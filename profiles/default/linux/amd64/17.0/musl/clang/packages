@@ -1,0 +1,6 @@
+### gcc and binutils not needed with clang 
+# but not removing immediately, needs more testing
+*sys-devel/gcc
+*sys-devel/gcc-config
+*sys-devel/binutils
+*sys-devel/binutils-config
