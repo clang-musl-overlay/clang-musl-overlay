@@ -435,10 +435,10 @@ multilib_src_configure() {
 	use x86 && local -x LDFLAGS="${LDFLAGS} -Wl,--no-keep-memory"
 
 	# Link polly against LLVM, #715612
- 	if use polly; then
- 		local -x LDFLAGS="${LDFLAGS} \
- 			-L\"${EPREFIX}/usr/lib/llvm/${SLOT}/lib\" -lPolly -lPollyISL"
- 	fi
+	if use polly; then
+		local -x LDFLAGS="${LDFLAGS} \
+			-L\"${EPREFIX}/usr/lib/llvm/${SLOT}/lib\" -lPolly -lPollyISL"
+	fi
 
 	# LLVM_ENABLE_ASSERTIONS=NO does not guarantee this for us, #614844
 	use debug || local -x CPPFLAGS="${CPPFLAGS} -DNDEBUG"
