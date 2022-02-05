@@ -1,55 +1,47 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-CMAKE_ECLASS=cmake
 PYTHON_COMPAT=( python3_{8..10} )
-inherit cmake linux-info llvm llvm.org python-any-r1
+inherit cmake linux-info llvm llvm.org python-single-r1
 
 DESCRIPTION="Polyhedral optimizations for LLVM"
 HOMEPAGE="https://llvm.org/"
 
 LICENSE="Apache-2.0-with-LLVM-exceptions UoI-NCSA"
 SLOT="$(ver_cut 1)"
-KEYWORDS="~amd64"
+KEYWORDS="~amd64 ~x86"
 IUSE="test"
 RESTRICT="!test? ( test )"
 
-RDEPEND="~sys-devel/llvm-${PV}"
+RDEPEND="~sys-devel/llvm-${PV}:${SLOT}="
 DEPEND="${RDEPEND}"
 BDEPEND="
 	>=dev-util/cmake-3.16
-	test? ( $(python_gen_any_dep "~dev-python/lit-${PV}[\${PYTHON_USEDEP}]") )"
+	test? ( >=dev-python/lit-9.0.1 )
+	${PYTHON_DEPS}"
 
-LLVM_COMPONENTS=( polly llvm )
-LLVM_TEST_COMPONENTS=( llvm/utils/{lit,unittest} )
+LLVM_COMPONENTS=( polly )
 llvm.org_set_globals
 
-python_check_deps() {
-	has_version -b "dev-python/lit[${PYTHON_USEDEP}]"
-}
-
 pkg_setup() {
-	LLVM_MAX_SLOT=${PV%%.*} llvm_pkg_setup
-	use test && python-any-r1_pkg_setup
+	LLVM_MAX_SLOT=${SLOT} llvm_pkg_setup
+	python-single-r1_pkg_setup
 }
 
 src_configure() {
 	local mycmakeargs=(
 		-DBUILD_SHARED_LIBS=OFF
-		-DLLVM_LINK_LLVM_DYLIB=ON
+		-DLLVM_BUILD_TESTS=$(usex test)
+		-DPython3_EXECUTABLE="${PYTHON}"
 		-DLLVM_POLLY_LINK_INTO_TOOLS=OFF
-		-DLLVM_INCLUDE_TESTS=$(usex test)
 		-DCMAKE_INSTALL_PREFIX="${EPREFIX}/usr/lib/llvm/${SLOT}"
 		-DCMAKE_PREFIX_PATH="${EPREFIX}/usr/lib/llvm/${SLOT}/$(get_libdir)/cmake/llvm"
 	)
 	use test && mycmakeargs+=(
-		-DLLVM_BUILD_TESTS=ON
-		-DLLVM_MAIN_SRC_DIR="${WORKDIR}/llvm"
-		-DLLVM_EXTERNAL_LIT="${EPREFIX}/usr/bin/lit"
 		-DLLVM_LIT_ARGS="$(get_lit_flags)"
-		-DPython3_EXECUTABLE="${PYTHON}"
+		-DLLVM_EXTERNAL_LIT="${EPREFIX}/usr/bin/lit"
 	)
 
 	cmake_src_configure
