@@ -1,14 +1,11 @@
 # Copyright 2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-# additional clang specific env-vars
+# additional clang specific overrides
 # find the defaults in /var/db/repos/gentoo/features/clang/make.defaults
 
-# use clang-cpp
 CPP="clang-cpp"
-
-# use libc++ as primary c++ library 
 CXXSTDLIB="c++"
-
-# use llvm-mc instead of llvm-as
 AS="llvm-mc"
+MT="llvm-mt"
+DLLTOOL="llvm-dlltool"
