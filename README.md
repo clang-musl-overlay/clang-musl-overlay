@@ -20,6 +20,10 @@ sync-type = git
 location = /var/db/repos/clang-musl
 ```
   - Sync this new repo using `emaint sync -r clang-musl` or `emerge --sync`
+  
+
+### `clang/musl` Profiles
+These profiles are highly experimental. Please refrain from using these if you don't know what you are doing.
   - Use `eselect` to list all the profiles. Note the new profile and select the profile
 ```
 eselect profile set --force <profile>
@@ -28,3 +32,13 @@ eselect profile set --force <profile>
 ```
 emerge -e1 @world
 ```
+
+PS: Some programs may fail to build when `AS` variable is set (set by the gentoo `clang` profile).
+This can be solved by unsetting it or [#732190](https://bugs.gentoo.org/732190)
+
+### clang Stage4
+An experimental clang stage4(x86_64) is available [here](https://github.com/dacyberduck/clang-musl-overlay/releases) which contains a self-hosted clang with polly support to reduce the initial rebuilds.
+
+
+
+
