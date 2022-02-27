@@ -1,10 +1,5 @@
 # `clang-musl` overlay
-Overlay containing experimental clang/musl profile and related ebuilds.
-
-### Goal
-The primary goal of this overlay is to provide ebuilds, modified for building programs using the clang compiler.
-The `clang/musl` profile is a combined version of gentoo's musl and clang profile. There is also a `clang/musl/hardened` profile available.
-Keep in mind that these are experimental profiles and may require manual intervention at times.
+Overlay containing experimental clang-musl profile and related ebuilds.
 
 ### Prequisite
   - Some knowledge of compilers, linkers and gentoo's package manager `portage`.
@@ -20,10 +15,15 @@ sync-type = git
 location = /var/db/repos/clang-musl
 ```
   - Sync this new repo using `emaint sync -r clang-musl` or `emerge --sync`
-  
 
-### `clang/musl` Profiles
-These profiles are highly experimental. Please refrain from using these if you don't know what you are doing.
+### Profiles
+`clang-musl` profile installs `sys-devel/llvm-config` and `sys-devel/clang-config` which
+  - sets clang as default compiler
+  - sets llvm provided binutils as default binutils
+  - sets lld as default linker program
+  - sets libc++ as primary c++ stdlib provider
+
+Switching to `clang-musl` profile:
   - Use `eselect` to list all the profiles. Note the new profile and select the profile
 ```
 eselect profile set --force <profile>
@@ -33,12 +33,6 @@ eselect profile set --force <profile>
 emerge -e1 @world
 ```
 
-PS: Some programs may fail to build when `AS` variable is set (set by the gentoo `clang` profile).
-This can be solved by unsetting it or [#732190](https://bugs.gentoo.org/732190)
-
-### clang Stage4
-An experimental clang stage4(x86_64) is available [here](https://github.com/dacyberduck/clang-musl-overlay/releases) which contains a self-hosted clang with polly support to reduce the initial rebuilds.
-
-
-
+### Stage4
+An experimental stage4(x86_64) is available [here](https://github.com/dacyberduck/clang-musl-overlay/releases) which contains a self-hosted clang with polly support to reduce the initial rebuilds.
 

@@ -1,3 +1,0 @@
-gentoo:default/linux/amd64/17.0/musl/hardened
-gentoo:features/clang
-../../../../../../../overrides
