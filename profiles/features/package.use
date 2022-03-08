@@ -6,7 +6,7 @@ sys-devel/clang default-compiler-rt default-lld default-libcxx llvm-libunwind
 sys-libs/compiler-rt clang
 
 # disable sanitizers for now
-sys-devel/clang-runtime compiler-rt libcxx sanitize
+sys-devel/clang-runtime compiler-rt libcxx -sanitize
 # sys-libs/compiler-rt-sanitizers clang
 
 sys-libs/libcxx libunwind libcxxabi

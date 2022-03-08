@@ -3,6 +3,10 @@
 
 # this is for now highly experimental -dilfridge
 
+# force portage to use clang as the primary compiler
+CC="${CHOST}-clang"
+CXX="${CHOST}-clang++"
+CPP="${CHOST}-clang-cpp"
 CXXSTDLIB="c++"
 
 # bootstrap USE for stage1
@@ -14,7 +18,7 @@ BOOTSTRAP_USE="${BOOTSTRAP_USE} ssl curl_ssl_openssl"
 BOOTSTRAP_USE="${BOOTSTRAP_USE} python_single_target_python3_9"
 
 # sys-devel/llvm
-BOOTSTRAP_USE="${BOOTSTRAP_USE} -gold"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -gold -binutils-plugin"
 
 # sys-devel/clang, sys-devel/clang-runtime, sys-libs/llvm-libunwind, sys-libs/libcxx, sys-libs/libcxxabi
 BOOTSTRAP_USE="${BOOTSTRAP_USE} compiler-rt clang libunwind"
