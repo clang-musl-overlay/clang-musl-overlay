@@ -7,9 +7,9 @@
 *sys-libs/compiler-rt
 *sys-libs/llvm-libunwind
 *sys-devel/cc-config
+*sys-devel/binutils-config
 
 # not needed with clang
 -*sys-devel/gcc
 -*sys-devel/gcc-config
-#-*sys-devel/binutils
-#-*sys-devel/binutils-config
+-*sys-devel/binutils
