@@ -10,7 +10,7 @@ Overlay containing experimental clang-musl profile and related ebuilds.
   - Create a new file `/etc/portage/repos.conf/clang-musl.conf` with the following contents:
 ```
 [clang-musl]
-sync-uri = https://github.com/dacyberduck/clang-musl-overlay.git
+sync-uri = https://github.com/clang-musl-overlay/clang-musl-overlay.git
 sync-type = git
 location = /var/db/repos/clang-musl
 ```
