@@ -1,0 +1,41 @@
+diff --git a/gcc-config b/gcc-config
+index eff9cca..8fa1a8d 100755
+--- a/gcc-config
++++ b/gcc-config
+@@ -322,7 +322,12 @@ update_wrappers() {
+ 		fi
+ 
+ 		# Now do the actual linking to the target binary
+-		if [[ ${x#${CTARGET}-} == ${x} && ${USE_NATIVE_LINKS} != yes ]]; then
++		if [[ ${x#${CTARGET}-} == @(cc|c++|cpp) ]] && [[ ${USE_CC_WRAPPERS} != yes ]]; then
++			# if USE_CC_WRAPPERS==yes only then overwrite/delete
++			# /usr/bin/cc,c++,cpp,$CHOST-cc,$CHOST-c++,$CHOST-cpp
++			# and other wrappers. otherwise skip them entirely
++			continue
++		elif [[ ${x#${CTARGET}-} == ${x} && ${USE_NATIVE_LINKS} != yes ]]; then
+ 			# Delete stale native symlink.
+ 			rm -f "${EROOT}usr/bin/${x}"
+ 		elif [[ -x ${ref} ]] ; then
+@@ -333,10 +338,11 @@ update_wrappers() {
+ 		fi
+ 	done
+ 	# legacy cruft, make sure we dont leave it laying around #143205
+-	rm -f "${EROOT}usr/bin/${CTARGET}-cc" "${EROOT}usr/bin"/{${CTARGET}-,}g{cc,++}{32,64}
++	[[ ${USE_CC_WRAPPERS} == yes ]] && rm -f "${EROOT}usr/bin/${CTARGET}-cc"
++	rm -f "${EROOT}usr/bin"/{${CTARGET}-,}g{cc,++}{32,64}
+ 
+ 	# handle the canonical cpp wrapper
+-	if ! is_cross_compiler ; then
++	if ! is_cross_compiler && [[ ${USE_CC_WRAPPERS} == yes ]]; then
+ 		if [[ ${USE_NATIVE_LINKS} == yes ]]; then
+ 			atomic_ln "${EPREFIX%/}/usr/bin/${CTARGET}-cpp" "${EROOT}lib" "cpp"
+ 		else
+@@ -345,7 +351,7 @@ update_wrappers() {
+ 	fi
+ 
+ 	# handle c89 and c99 wrappers
+-	if ! is_cross_compiler ; then
++	if ! is_cross_compiler && [[ ${USE_CC_WRAPPERS} == yes ]]; then
+ 		if [[ ${USE_NATIVE_LINKS} == yes ]]; then
+ 			# In June 2020 gcc-config taken over file handling from toolchain.eclass.
+ 			cp -fpP "${EROOT}"usr/share/gcc-config/c89 "${EROOT}"usr/bin/c89

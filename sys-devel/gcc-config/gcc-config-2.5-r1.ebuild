@@ -1,24 +1,26 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
 if [[ ${PV} == 9999 ]]; then
-	EGIT_REPO_URI="https://github.com/dacyberduck/cc-config.git"
+	EGIT_REPO_URI="https://anongit.gentoo.org/git/proj/gcc-config.git"
 	inherit git-r3
 else
-	SRC_URI="https://github.com/dacyberduck/cc-config/archive/refs/tags/v${PV}.tar.gz"
+	SRC_URI="https://dev.gentoo.org/~sam/distfiles/${CATEGORY}/${PN}/${P}.tar.xz"
 	KEYWORDS="~alpha amd64 arm arm64 hppa ~ia64 ~m68k ~mips ppc ppc64 ~riscv ~s390 sparc x86"
 fi
 
 DESCRIPTION="Utility to manage compilers"
-HOMEPAGE="https://github.com/dacyberduck/cc-config.git/"
+HOMEPAGE="https://gitweb.gentoo.org/proj/gcc-config.git/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="+cc-wrappers +native-symlinks +update-wrappers"
+IUSE="cc-wrappers native-symlinks"
 
 RDEPEND=">=sys-apps/gentoo-functions-0.10"
+
+PATCHES=( "${FILESDIR}/${PN}"-change-native-links-handling.patch )
 
 _emake() {
 	emake \
@@ -26,7 +28,6 @@ _emake() {
 		SUBLIBDIR="$(get_libdir)" \
 		USE_CC_WRAPPERS="$(usex cc-wrappers)" \
 		USE_NATIVE_LINKS="$(usex native-symlinks)" \
-		UPDATE_CC_WRAPPERS="$(usex update-wrappers)" \
 		TOOLCHAIN_PREFIX="${CHOST}-" \
 		"$@"
 }
