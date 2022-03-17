@@ -6,7 +6,7 @@
 *sys-libs/libcxxabi
 *sys-libs/compiler-rt
 *sys-libs/llvm-libunwind
-*sys-devel/cc-config
+*sys-devel/clang-config
 *sys-devel/binutils-config
 
 # not needed with clang

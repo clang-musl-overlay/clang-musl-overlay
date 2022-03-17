@@ -14,6 +14,3 @@ sys-libs/libcxxabi libunwind
 
 # libgcrypt doesn't like optimizations
 dev-libs/libgcrypt o-flag-munging
-
-# cc-config
-sys-devel/cc-config cc-wappers native-symlinks update-wrappers
