@@ -18,14 +18,14 @@ HOMEPAGE="https://llvm.org/"
 
 LICENSE="Apache-2.0-with-LLVM-exceptions UoI-NCSA BSD public-domain rc"
 SLOT="$(ver_cut 1)"
-KEYWORDS="amd64 x86"
-IUSE="debug doc exegesis +gold libedit +libffi ncurses polly test xar xml z3"
+KEYWORDS=""
+IUSE="+binutils-plugin debug doc exegesis libedit +libffi ncurses polly test xar xml z3"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
 	sys-libs/zlib:0=[${MULTILIB_USEDEP}]
+	binutils-plugin? ( >=sys-devel/binutils-2.31.1-r4:*[plugins] )
 	exegesis? ( dev-libs/libpfm:= )
-	gold? ( >=sys-devel/binutils-2.31.1-r4:*[plugins] )
 	libedit? ( dev-libs/libedit:0=[${MULTILIB_USEDEP}] )
 	libffi? ( >=dev-libs/libffi-3.0.13-r1:0=[${MULTILIB_USEDEP}] )
 	ncurses? ( >=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}] )
@@ -34,7 +34,7 @@ RDEPEND="
 	xml? ( dev-libs/libxml2:2=[${MULTILIB_USEDEP}] )
 	z3? ( >=sci-mathematics/z3-4.7.1:0=[${MULTILIB_USEDEP}] )"
 DEPEND="${RDEPEND}
-	gold? ( sys-libs/binutils-libs )"
+	binutils-plugin? ( sys-libs/binutils-libs )"
 BDEPEND="
 	dev-lang/perl
 	>=dev-util/cmake-3.16
@@ -54,11 +54,11 @@ BDEPEND="
 RDEPEND="${RDEPEND}
 	!sys-devel/llvm:0"
 PDEPEND="sys-devel/llvm-common
-	gold? ( >=sys-devel/llvmgold-${SLOT} )"
+	binutils-plugin? ( >=sys-devel/llvmgold-${SLOT} )"
 
-LLVM_COMPONENTS=( llvm )
-LLVM_MANPAGES=pregenerated
-LLVM_PATCHSET=${PV/_/-}
+LLVM_COMPONENTS=( llvm third-party )
+LLVM_MANPAGES=build
+LLVM_PATCHSET=9999-1
 LLVM_USE_TARGETS=provide
 llvm.org_set_globals
 
@@ -308,7 +308,7 @@ get_distribution_components() {
 			docs-llvm-html
 		)
 
-		use gold && out+=(
+		use binutils-plugin && out+=(
 			LLVMgold
 		)
 	fi
@@ -405,7 +405,7 @@ multilib_src_configure() {
 			-DLLVM_ENABLE_DOXYGEN=OFF
 			-DLLVM_INSTALL_UTILS=ON
 		)
-		use gold && mycmakeargs+=(
+		use binutils-plugin && mycmakeargs+=(
 			-DLLVM_BINUTILS_INCDIR="${EPREFIX}"/usr/include
 		)
 	fi
@@ -434,8 +434,8 @@ multilib_src_configure() {
 	# exhausting the limit on 32-bit linker executable
 	use x86 && local -x LDFLAGS="${LDFLAGS} -Wl,--no-keep-memory"
 
-	# Link polly against llvm, #715612
-	if use polly ; then
+	# Link polly against LLVM, #715612
+	if use polly; then
 		local -x LDFLAGS="${LDFLAGS} \
 			-L\"${EPREFIX}/usr/lib/llvm/${SLOT}/lib\" -lPolly -lPollyISL"
 	fi
