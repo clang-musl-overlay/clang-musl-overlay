@@ -21,7 +21,7 @@ BDEPEND="
 	test? ( >=dev-python/lit-9.0.1 )
 	${PYTHON_DEPS}"
 
-LLVM_COMPONENTS=( polly )
+LLVM_COMPONENTS=( polly cmake )
 llvm.org_set_globals
 
 pkg_setup() {
