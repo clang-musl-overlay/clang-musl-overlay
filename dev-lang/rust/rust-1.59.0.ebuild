@@ -3,27 +3,26 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{7..10} )
+PYTHON_COMPAT=( python3_{8..10} )
 
 inherit bash-completion-r1 check-reqs estack flag-o-matic llvm multiprocessing \
 	multilib multilib-build python-any-r1 rust-toolchain toolchain-funcs verify-sig
 
 if [[ ${PV} = *beta* ]]; then
 	betaver=${PV//*beta}
-	ABI_VER=${PV//_beta*}
 	BETA_SNAPSHOT="${betaver:0:4}-${betaver:4:2}-${betaver:6:2}"
 	MY_P="rustc-beta"
-	SLOT="beta/${ABI_VER}"
+	SLOT="beta/${PV}"
 	SRC="${BETA_SNAPSHOT}/rustc-beta-src.tar.xz -> rustc-${PV}-src.tar.xz"
 else
 	ABI_VER="$(ver_cut 1-2)"
 	SLOT="stable/${ABI_VER}"
 	MY_P="rustc-${PV}"
 	SRC="${MY_P}-src.tar.xz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~riscv ~x86"
+	KEYWORDS="~amd64 ~x86"
 fi
 
-RUST_STAGE0_VERSION="1.$(($(ver_cut 2) - 1)).0"
+RUST_STAGE0_VERSION="1.$(($(ver_cut 2) - 1)).1"
 
 DESCRIPTION="Systems programming language from Mozilla"
 HOMEPAGE="https://www.rust-lang.org/"
@@ -42,7 +41,7 @@ LLVM_TARGET_USEDEPS=${ALL_LLVM_TARGETS[@]/%/(-)?}
 
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 
-IUSE="clippy cpu_flags_x86_sse2 debug dist doc miri nightly parallel-compiler rls rustfmt rust-src system-bootstrap system-llvm test wasm wasi default-libcxx +profile +sanitizers +llvm-libunwind ${ALL_LLVM_TARGETS[*]}"
+IUSE="clippy cpu_flags_x86_sse2 debug dist doc miri nightly parallel-compiler rls rustfmt rust-src system-bootstrap system-llvm test wasm default-libcxx +profile +sanitizers +llvm-libunwind ${ALL_LLVM_TARGETS[*]}"
 
 # Please keep the LLVM dependency block separate. Since LLVM is slotted,
 # we need to *really* make sure we're not pulling more than one slot
@@ -50,7 +49,7 @@ IUSE="clippy cpu_flags_x86_sse2 debug dist doc miri nightly parallel-compiler rl
 
 # How to use it:
 # List all the working slots in LLVM_VALID_SLOTS, newest first.
-LLVM_VALID_SLOTS=( 13 )
+LLVM_VALID_SLOTS=( 13 14 )
 LLVM_MAX_SLOT="${LLVM_VALID_SLOTS[0]}"
 
 # splitting usedeps needed to avoid CI/pkgcheck's UncheckableDep limitation
@@ -106,10 +105,9 @@ DEPEND="
 	net-misc/curl:=[http2,ssl]
 	sys-libs/zlib:=
 	dev-libs/openssl:0=
-	default-libcxx? ( sys-devel/clang[default-libcxx] )
+	default-libcxx? ( sys-devel/clang:=[default-libcxx] )
 	llvm-libunwind? ( sys-libs/llvm-libunwind )
 	system-llvm? ( ${LLVM_DEPEND} )
-	wasi? ( dev-libs/wasi-libc )
 "
 
 # we need to block older versions due to layout changes.
@@ -125,7 +123,6 @@ REQUIRED_USE="|| ( ${ALL_LLVM_TARGETS[*]} )
 	rls? ( rust-src )
 	test? ( ${ALL_LLVM_TARGETS[*]} )
 	wasm? ( llvm_targets_WebAssembly )
-	wasi? ( llvm_targets_WebAssembly wasm )
 	x86? ( cpu_flags_x86_sse2 )
 	elibc_musl? ( llvm-libunwind )
 "
@@ -276,9 +273,6 @@ src_configure() {
 			# https://bugs.gentoo.org/715348
 			sed -i '/linker:/ s/rust-lld/wasm-ld/' compiler/rustc_target/src/spec/wasm_base.rs || die
 		fi
-	fi
-	if use wasi; then
-		rust_targets="${rust_targets},\"wasm32-wasi\""
 	fi
 	rust_targets="${rust_targets#,}"
 
@@ -431,15 +425,6 @@ src_configure() {
 		cat <<- _EOF_ >> "${S}"/config.toml
 			[target.wasm32-unknown-unknown]
 			linker = "$(usex system-llvm lld rust-lld)"
-			profiler = false
-			sanitizers = false
-		_EOF_
-	fi
-	if use wasi; then
-		cat <<- _EOF_ >> "${S}"/config.toml
-			[target.wasm32-wasi]
-			linker = "$(usex system-llvm lld rust-lld)"
-			wasi-root = "/opt/wasm32-wasi"
 			profiler = false
 			sanitizers = false
 		_EOF_
