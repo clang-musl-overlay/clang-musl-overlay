@@ -9,11 +9,6 @@ CPP="${CHOST}-clang-cpp"
 # needed for rust to use libcxx
 CXXSTDLIB="c++"
 
-# sane flag defaults
-CFLAGS="${CFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
-CXXFLAGS="${CXXFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
-LDFLAGS="${LDFLAGS} -Wl,--as-needed,-znow,-zrelro -pie"
-
 # curl needed by cmake
 BOOTSTRAP_USE="${BOOTSTRAP_USE} ssl curl_ssl_openssl"
 

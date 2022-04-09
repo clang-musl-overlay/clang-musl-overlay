@@ -1,1 +1,2 @@
 amd64	default/linux/amd64/17.0/musl/llvm-toolchain		exp
+amd64	default/linux/amd64/17.0/musl/llvm-toolchain/hardened		exp

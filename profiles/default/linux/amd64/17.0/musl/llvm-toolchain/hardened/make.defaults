@@ -1,0 +1,4 @@
+# add hardening flags
+CFLAGS="${CFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+CXXFLAGS="${CXXFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+LDFLAGS="${LDFLAGS} -Wl,--as-needed,-znow,-zrelro -pie"
