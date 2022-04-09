@@ -1,0 +1,37 @@
+# Copyright 2022 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+# force portage to use clang as the primary compiler
+CC="${CHOST}-clang"
+CXX="${CHOST}-clang++"
+CPP="${CHOST}-clang-cpp"
+
+# needed for rust to use libcxx
+CXXSTDLIB="c++"
+
+# sane flag defaults
+CFLAGS="${CFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+CXXFLAGS="${CXXFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+LDFLAGS="${LDFLAGS} -Wl,--as-needed,-znow,-zrelro -pie"
+
+# curl needed by cmake
+BOOTSTRAP_USE="${BOOTSTRAP_USE} ssl curl_ssl_openssl"
+
+# clang needs this
+BOOTSTRAP_USE="${BOOTSTRAP_USE} python_single_target_python3_9"
+
+# llvm related useflags
+BOOTSTRAP_USE="${BOOTSTRAP_USE} clang compiler-rt default-compiler-rt"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} default-libcxx default-lld libcxx libcxxabi"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} lld llvm-libunwind"
+
+# llvm & clang: explicitly disable all extra targets, otherwise linking stage2 fails
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_AArch64 -llvm_targets_AMDGPU"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_ARM -llvm_targets_AVR"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_BPF -llvm_targets_Hexagon"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_Lanai -llvm_targets_MSP430"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_Mips -llvm_targets_NVPTX"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_PowerPC -llvm_targets_RISCV"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_Sparc -llvm_targets_SystemZ"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_VE -llvm_targets_WebAssembly"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_XCore"

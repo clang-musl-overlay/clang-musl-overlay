@@ -1,0 +1,15 @@
+# disable bfd/gold plugin
+sys-devel/llvm -binutils-plugin
+
+# disable sanitizers for now
+sys-devel/clang-runtime -sanitize
+
+# enable llvm-libunwind for libcxx
+sys-libs/libcxx libunwind
+sys-libs/libcxxabi libunwind
+
+# libgcrypt doesn't like optimizations
+dev-libs/libgcrypt o-flag-munging
+
+# cc-config
+sys-devel/cc-config cc-wrappers native-symlinks update-wrappers
