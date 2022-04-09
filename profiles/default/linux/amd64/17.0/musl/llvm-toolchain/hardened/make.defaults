@@ -1,4 +1,14 @@
 # add hardening flags
-CFLAGS="${CFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
-CXXFLAGS="${CXXFLAGS} -fPIC -fstack-protector-strong -D_FORTIFY_SOURCE=2"
-LDFLAGS="${LDFLAGS} -Wl,--as-needed,-znow,-zrelro -pie"
+_HARDENING_CFLAGS="${_HARDENING_CFLAGS} -fPIC"
+_HARDENING_CFLAGS="${_HARDENING_CFLAGS} -D_FORTIFY_SOURCE=2"
+_HARDENING_CFLAGS="${_HARDENING_CFLAGS} -fstack-clash-protection"
+_HARDENING_CFLAGS="${_HARDENING_CFLAGS} -fstack-protector-strong"
+_HARDENING_CFLAGS="${_HARDENING_CFLAGS} -Wformat -Werror=format-security"
+_HARDENING_CFLAGS="${_HARDENING_CFLAGS} -fdata-sections -ffunction-sections"
+_HARDENING_LDFLAGS="${_HARDENING_LDFLAGS} -Wl,-znow,-zrelro -pie"
+
+CFLAGS="${CFLAGS} ${_HARDENING_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} ${_HARDENING_CFLAGS}"
+FCFLAGS="${FCFLAGS} ${_HARDENING_CFLAGS}"
+FFLAGS="${FFLAGS} ${_HARDENING_CFLAGS}"
+LDFLAGS="${LDFLAGS} ${_HARDENING_LDFLAGS}"
