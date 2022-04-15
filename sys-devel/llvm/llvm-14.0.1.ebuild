@@ -29,7 +29,7 @@ RDEPEND="
 	libedit? ( dev-libs/libedit:0=[${MULTILIB_USEDEP}] )
 	libffi? ( >=dev-libs/libffi-3.0.13-r1:0=[${MULTILIB_USEDEP}] )
 	ncurses? ( >=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}] )
-	polly? ( ~sys-libs/polly-${PV}:${SLOT}= )
+	polly? ( sys-libs/polly:${SLOT}= )
 	xar? ( app-arch/xar )
 	xml? ( dev-libs/libxml2:2=[${MULTILIB_USEDEP}] )
 	z3? ( >=sci-mathematics/z3-4.7.1:0=[${MULTILIB_USEDEP}] )"

@@ -14,7 +14,7 @@ SLOT="$(ver_cut 1)"
 IUSE="test"
 RESTRICT="!test? ( test )"
 
-PDEPEND="~sys-devel/llvm-${PV}:${SLOT}="
+PDEPEND="sys-devel/llvm:${SLOT}="
 BDEPEND="
 	>=dev-util/cmake-3.16
 	test? ( >=dev-python/lit-9.0.1 )
