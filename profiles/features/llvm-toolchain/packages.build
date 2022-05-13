@@ -6,10 +6,10 @@ sys-devel/llvm
 sys-devel/lld
 sys-devel/clang
 sys-libs/llvm-libunwind
-sys-devel/cc-config
-sys-devel/binutils-config
+sys-devel/llvm-conf
 
 # remove gcc & friends
 -sys-devel/gcc
 -sys-devel/gcc-config
 -sys-devel/binutils
+-sys-devel/binutils-config

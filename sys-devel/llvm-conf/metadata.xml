@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="project">
+		<email>toolchain@gentoo.org</email>
+		<name>Gentoo Toolchain Project</name>
+	</maintainer>
+	<use>
+		<flag name="clang-wrappers">Manage wrappers in /usr/bin to use clang as default compiler. Otherwise ignore them.</flag>
+		<flag name="binutils-wrappers">Manage wrappers in /usr/bin to use llvm provided binutils instead of gnu binutils. Otherwise ignore them.</flag>
+		<flag name="native-symlinks">Create native symlinks like 'cc' or 'c++' to /usr/bin. Otherwise keep only ${CHOST}-cc and friends.</flag>
+	</use>
+</pkgmetadata>

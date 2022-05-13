@@ -13,6 +13,7 @@ Overlay containing experimental clang-musl profile and related ebuilds.
 sync-uri = https://github.com/clang-musl-overlay/clang-musl-overlay.git
 sync-type = git
 location = /var/db/repos/clang-musl
+sync-depth = 1
 ```
   - Sync this new repo using `emaint sync -r clang-musl` or `emerge --sync`
 
@@ -25,22 +26,13 @@ Switching to `clang-musl` profile:
 eselect profile set --force <profile>
 ```
 
-### Setting clang/llvm as primary compiler/binutil
+### Setting clang and llvm binutils as default
   - Switch to `clang-musl` profile 
-  - Unmerge `sys-devel/gcc-config`
-  - Merge `sys-devel/cc-config` and `sys-devel/binutils-config` from this ovelay
-  - Or you can simply `emerge -uDN @world` which will pull in these pkgs
-  - To set latest clang as primary compiler
-```
-cc-config clang
-clang-config latest
-```
-  - To use llvm provided binutils instead of gnu binutils `binutils-config llvm-latest`
-  - To rebuild everything using clang/llvm
-```
-emerge -euDN1 @world
-```
+  - Unmerge gcc, binutils and their dependencies with a --depclean. `emerge -c`
+  - Merge `sys-devel/llvm-conf`. This should automatically set latest llvm/clang as your default toolchain.
+    - Or you can run `llvm-conf --enbale-native-links --enable-clang-wrappers --enable-binutils-wrappers llvm-14`
+  - Now you can run `emerge -1euDN @world` to rebuild everything with clang/llvm.
 
 ### Issues
   - Programs may fail to build when using clang. There are already patches for known issues at [gentoo-patchset](https://github.com/leonardohn/gentoo-patchset.git).
-  - LTO and other optimization may lead to build issues for some pkgs. Consider opening bug reports
+  - LTO and other optimization may lead to build issues for some pkgs. Please report if you find any issue.

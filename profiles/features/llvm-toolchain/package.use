@@ -11,5 +11,5 @@ sys-libs/libcxxabi libunwind
 # libgcrypt doesn't like optimizations
 dev-libs/libgcrypt o-flag-munging
 
-# cc-config
-sys-devel/cc-config cc-wrappers native-symlinks update-wrappers
+# llvm-conf utility to manage llvm/clang profiles
+sys-devel/llvm-conf binutils-wrappers clang-wrappers native-symlinks

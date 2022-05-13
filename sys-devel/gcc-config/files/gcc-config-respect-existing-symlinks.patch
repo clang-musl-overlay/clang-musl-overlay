@@ -1,0 +1,56 @@
+diff --git a/gcc-config b/gcc-config
+index eff9cca..0c7ae95 100755
+--- a/gcc-config
++++ b/gcc-config
+@@ -320,6 +320,15 @@ update_wrappers() {
+				ref="${ROOT}${GCC_PATH}/${x#${CTARGET}-}"
+			fi
+		fi
++		# Make gcc-config overwrite/delete some symlinks
++		# only on demand
++
++		# If USE_CC_WRAPPERS=no then don't update/delete
++		# cc,c++,cpp,CTARGET-cc,CTARGET-c++,CTARGET-cpp
++		# symlinks in /usr/bin; let's use clang as default complier
++		if [[ ${USE_CC_WRAPPERS} != yes ]] && [[ ${x#${CTARGET}-} == @(cc|c++|cpp) ]]; then
++			continue
++		fi
+
+		# Now do the actual linking to the target binary
+		if [[ ${x#${CTARGET}-} == ${x} && ${USE_NATIVE_LINKS} != yes ]]; then
+@@ -333,10 +342,11 @@ update_wrappers() {
+		fi
+	done
+	# legacy cruft, make sure we dont leave it laying around #143205
+-	rm -f "${EROOT}usr/bin/${CTARGET}-cc" "${EROOT}usr/bin"/{${CTARGET}-,}g{cc,++}{32,64}
++	[[ ${USE_CC_WRAPPERS} == yes ]] && rm -f "${EROOT}usr/bin/${CTARGET}-cc"
++	rm -f "${EROOT}usr/bin"/{${CTARGET}-,}g{cc,++}{32,64}
+
+	# handle the canonical cpp wrapper
+-	if ! is_cross_compiler ; then
++	if ! is_cross_compiler && [[ ${USE_CC_WRAPPERS} == yes ]]; then
+		if [[ ${USE_NATIVE_LINKS} == yes ]]; then
+			atomic_ln "${EPREFIX%/}/usr/bin/${CTARGET}-cpp" "${EROOT}lib" "cpp"
+		else
+@@ -345,7 +355,7 @@ update_wrappers() {
+	fi
+
+	# handle c89 and c99 wrappers
+-	if ! is_cross_compiler ; then
++	if ! is_cross_compiler && [[ ${USE_CC_WRAPPERS} == yes ]]; then
+		if [[ ${USE_NATIVE_LINKS} == yes ]]; then
+			# In June 2020 gcc-config taken over file handling from toolchain.eclass.
+			cp -fpP "${EROOT}"usr/share/gcc-config/c89 "${EROOT}"usr/bin/c89
+@@ -817,6 +827,12 @@ switch_profile() {
+	fi
+
+	eend 0
++	if [[ ${USE_CC_WRAPPERS} != yes ]] ; then
++		echo
++		ewarn "USE_CC_WRAPPERS is disabled. Skipping cc,c++ and cpp symlinks..."
++		ewarn "To use gcc as primary compiler, use --enable-cc-wrappers"
++		echo
++	fi
+
+	# This is needed mainly for MANPATH and INFOPATH updates.
+	if [[ ${envd_changed} -ne 0 ]] ; then
