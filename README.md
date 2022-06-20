@@ -3,7 +3,7 @@ Overlay containing experimental clang-musl profile and related ebuilds.
 
 ### Prequisite
   - A working gentoo/musl system.
-  - Self-hosted [clang](https://wiki.gentoo.org/wiki/Clang#Bootstrapping_the_Clang_toolchain) compiler
+  - Self-hosted [clang](https://wiki.gentoo.org/wiki/Clang#Bootstrapping_the_Clang_toolchain) compiler, with the default-libcxx USE flag enabled.
   - Some knowledge of compilers, linkers and gentoo's package manager `portage`.
 
 ### Installation
