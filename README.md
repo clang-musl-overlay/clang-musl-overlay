@@ -30,7 +30,7 @@ eselect profile set --force <profile>
   - Switch to `clang-musl` profile 
   - Unmerge gcc, binutils and their dependencies with a --depclean. `emerge -c`
   - Merge `sys-devel/llvm-conf`. This should automatically set latest llvm/clang as your default toolchain.
-    - Or you can run `llvm-conf --enbale-native-links --enable-clang-wrappers --enable-binutils-wrappers llvm-14`
+    - Or you can run `llvm-conf --enable-native-links --enable-clang-wrappers --enable-binutils-wrappers llvm-14`
   - Now you can run `emerge -1euDN @world` to rebuild everything with clang/llvm.
 
 ### Issues
