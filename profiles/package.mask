@@ -1,0 +1,14 @@
+## python-3.11 is still beta and not compiling.
+dev-lang/python:3.11::gentoo
+
+## The following modifications are to prevent problems with LLVM updates. Those 
+sys-devel/llvm::gentoo
+#sys-libs/compiler-rt::gentoo #this is commented, the overlay might need to provide this ebuild in the future.
+#sys-devel/clang::gentoo # commented because the overlay might need to provide this ebuild in the future.
+
+## clang-musl overlay provides its own rust. It comes with the stage3 but the overlay should provide alternatives to rust-bin as well.
+dev-lang/rust-bin
+dev-lang/rust::gentoo
+
+### The ebuild in the main tree causes runtime problems that prevent users from mapping and decrypting their file systems correctly. I highly suggest porting the ebuild from the :musl overlay.
+sys-fs/lvm2::gentoo
