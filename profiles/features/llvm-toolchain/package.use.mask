@@ -1,1 +1,3 @@
-sys-devel/gcc-config cc-wrappers native-symlinks
+# unmask clang useflag for firefox on musl
+# See Bug #829033 for more info
+www-client/firefox -clang
