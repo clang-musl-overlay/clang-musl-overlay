@@ -13,11 +13,11 @@ if [[ ${CTARGET} = ${CHOST} ]] ; then
 	fi
 fi
 
-PYTHON_COMPAT=( python3_{8..11} )
+PYTHON_COMPAT=( python3_{8..10} )
 inherit python-any-r1
-inherit autotools bash-completion-r1 eutils flag-o-matic ghc-package
-inherit multilib multiprocessing pax-utils toolchain-funcs prefix
-inherit check-reqs
+inherit autotools bash-completion-r1 flag-o-matic ghc-package
+inherit multiprocessing pax-utils toolchain-funcs prefix
+inherit check-reqs llvm
 DESCRIPTION="The Glasgow Haskell Compiler"
 HOMEPAGE="https://www.haskell.org/ghc/"
 
@@ -28,12 +28,14 @@ BIN_PV=${PV}
 # sorted!
 #arch_binaries="$arch_binaries alpha? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-alpha.tbz2 )"
 #arch_binaries="$arch_binaries arm? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-armv7a-hardfloat-linux-gnueabi.tbz2 )"
-#arch_binaries="$arch_binaries arm64? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-aarch64-unknown-linux-gnu.tbz2 )"
+#arch_binaries="$arch_binaries arm64? ( https://github.com/matoro/ghc/releases/download/${PV}/ghc-bin-${PV}-aarch64-unknown-linux-gnu.tar.gz )"
 arch_binaries="$arch_binaries amd64? ( https://github.com/uidops/ghc-musl/releases/download/${PV}-clang/ghc-bin-${PV}-x86_64-gentoo-linux-musl.tar.xz )"
 #arch_binaries="$arch_binaries ia64?  ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-ia64-fixed-fiw.tbz2 )"
 #arch_binaries="$arch_binaries ppc? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-ppc.tbz2 )"
-#arch_binaries="$arch_binaries ppc64? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-ppc64.tbz2 )"
-#arch_binaries="$arch_binaries ppc64? ( !big-endian? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-powerpc64le-unknown-linux-gnu.tbz2 ) )"
+#arch_binaries="$arch_binaries ppc64? (
+#	big-endian? ( https://github.com/matoro/ghc/releases/download/${PV}/ghc-bin-${PV}-powerpc64-unknown-linux-gnu.tar.gz )
+#	!big-endian? ( https://github.com/matoro/ghc/releases/download/${PV}/ghc-bin-${PV}-powerpc64le-unknown-linux-gnu.tar.gz )
+#)"
 #arch_binaries="$arch_binaries sparc? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-sparc.tbz2 )"
 #arch_binaries="$arch_binaries x86? ( https://eidetic.codes/ghc-bin-${PV}-i686-pc-linux-gnu.tbz2 )"
 
@@ -49,10 +51,7 @@ yet_binary() {
 		amd64) return 0 ;;
 		#ia64) return 0 ;;
 		#ppc) return 0 ;;
-		#ppc64)
-		#	use big-endian && return 0
-		#	return 0
-		#	;;
+		#ppc64) return 0 ;;
 		#sparc) return 0 ;;
 		#x86) return 0 ;;
 		*) return 1 ;;
@@ -77,10 +76,12 @@ BUMP_LIBRARIES=(
 
 LICENSE="BSD"
 SLOT="0/${PV}"
-KEYWORDS="~amd64"
-IUSE="big-endian +doc elfutils ghcbootstrap ghcmakebinary +gmp numa profile test binary"
+KEYWORDS="~amd64" #~arm64 ~ppc64 ~x86"
+IUSE="big-endian +doc elfutils ghcbootstrap ghcmakebinary +gmp +llvm numa profile test"
+IUSE+=" binary"
 RESTRICT="!test? ( test )"
 
+LLVM_MAX_SLOT="14"
 RDEPEND="
 	>=dev-lang/perl-5.6.1
 	dev-libs/gmp:0=
@@ -88,8 +89,13 @@ RDEPEND="
 	elfutils? ( dev-libs/elfutils )
 	!ghcmakebinary? ( dev-libs/libffi:= )
 	numa? ( sys-process/numactl )
+	llvm? ( <sys-devel/llvm-$((LLVM_MAX_SLOT+1)):= )
 "
 
+# This set of dependencies is needed to run
+# prebuilt ghc. We specifically avoid ncurses
+# dependency with:
+#    utils/ghc-pkg_HC_OPTS += -DBOOTSTRAPPING
 # This set of dependencies is needed to install
 # ghc[binary] in system. terminfo package is linked
 # against ncurses.
@@ -121,7 +127,7 @@ REQUIRED_USE="
 "
 
 # haskell libraries built with cabal in configure mode, #515354
-QA_CONFIGURE_OPTIONS+=" --with-compiler --with-gcc --target=${CHOST} --host=${CHOST} --build=${CHOST}"
+QA_CONFIGURE_OPTIONS+=" --with-compiler --with-gcc --host=${CHOST} --target=${CHOST} --build=${CHOST}"
 
 is_crosscompile() {
 	[[ ${CHOST} != ${CTARGET} ]]
@@ -262,15 +268,6 @@ ghc_setup_cflags() {
 	for flag in ${LDFLAGS}; do
 		append-ghc-cflags link ${flag}
 	done
-
-	# GHC uses ${CBUILD}-gcc, ${CHOST}-gcc and ${CTARGET}-gcc at a single build.
-	# Skip any gentoo-specific tweaks for cross-case to avoid passing unsupported
-	# options to gcc.
-	if is_native; then
-		# prevent from failing to build unregisterised ghc:
-		# https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg171602.html
-		use ppc64 && append-ghc-cflags persistent compile -mminimal-toc
-	fi
 }
 
 # substitutes string $1 to $2 in files $3 $4 ...
@@ -355,63 +352,13 @@ ghc-check-reqs() {
 	"$@"
 }
 
-# Using a non-UTF8 locale can cause build failures. This tries to locate
-# an available UTF-8 locale and switch to it temporarily.
-#
-# Modeled after python_export_utf8_locale() from python-utils-r1.eclass
-# <https://github.com/gentoo-haskell/gentoo-haskell/issues/1287>
-ghc-export-utf8-locale() {
-
-	# It is unclear which variables are necessary to be set to UTF-8 locales
-	# in order for GHC to build succesfully. Therefore, we use the same
-	# procedure on all of them.
-	local vars=(
-		LANG
-		LC_CTYPE
-		LC_NUMERIC
-		LC_TIME
-		LC_COLLATE
-		LC_MONETARY
-		LC_MESSAGES
-		LC_PAPER
-		LC_NAME
-		LC_ADDRESS
-		LC_TELEPHONE
-		LC_MEASUREMENT
-		LC_IDENTIFICATION
-		LC_ALL
-	)
-
-	for var in "${vars[@]}"; do
-		# If the variable is unset, we can skip it
-		[[ -z "${!var}" ]] && continue
-
-		# If the variable already has been set to a UTF-8 locale, we can skip it
-		[[ $(LC_ALL=${!var} locale charmap 2>/dev/null) == UTF-8 ]] && continue
-
-		# Try current language first, then everything else
-		local lang locales="${!var%%.*}.utf8 $(locale -a)"
-		local locale_found=false
-
-		for lang in ${locales}; do
-			if [[ $(LC_ALL=${lang} locale charmap 2>/dev/null) == UTF-8 ]]; then
-				einfo "Exporting available UTF-8 locale as ${var}: ${lang}"
-				export "${var}=${lang}"
-				locale_found=true
-				break
-			fi
-		done
-
-		if [[ $locale_found != true ]]; then
-			eerror "There seems to be no UTF-8 locale available on your system. This"
-			eerror "will cause build failures for dev-lang/ghc."
-			eerror ""
-			eerror "See <https://wiki.gentoo.org/wiki/Localization/Guide> for more"
-			eerror "info on setting up a UTF-8 locale."
-
-			die "Could not find UTF-8 locale"
-		fi
-	done
+llvmize() {
+	[[ -z "${1}" ]] && return
+	( find "${1}" -type f \
+		| file -if- \
+		| grep "text/x-shellscript" \
+		| awk -F: '{print $1}' \
+		| xargs sed -i "s#^exec #PATH=\"$(get_llvm_prefix "${LLVM_MAX_SLOT}")/bin:\${PATH}\" exec #") || die
 }
 
 pkg_pretend() {
@@ -443,6 +390,8 @@ pkg_setup() {
 	if needs_python; then
 		python-any-r1_pkg_setup
 	fi
+
+	use llvm && llvm_pkg_setup
 }
 
 src_unpack() {
@@ -459,9 +408,12 @@ src_unpack() {
 }
 
 src_prepare() {
-	ghc-export-utf8-locale
-
 	ghc_setup_cflags
+
+	# ghc-9.0.2 release anomaly
+	# https://www.mail-archive.com/search?l=ghc-devs@haskell.org&q=subject:%22Re%5C%3A+%5C%5BHaskell%5C%5D+%5C%5BANNOUNCE%5C%5D+GHC+9.0.2+released%22&o=newest&f=1
+	# https://src.fedoraproject.org/rpms/ghc9.0/blob/rawhide/f/ghc9.0.spec#_327
+	rm -rf "libraries/containers/containers/dist-install" || die
 
 	if ! use ghcbootstrap && [[ ${CHOST} != *-darwin* && ${CHOST} != *-solaris* ]]; then
 		# Modify the wrapper script from the binary tarball to use GHC_PERSISTENT_FLAGS.
@@ -474,6 +426,21 @@ src_prepare() {
 		# linking on it's own (bug #299709)
 		pax-mark -m "${WORKDIR}/usr/$(get_libdir)/${PN}-${BIN_PV}/bin/ghc"
 	fi
+
+	use llvm && llvmize "${WORKDIR}/usr/bin"
+
+	# binpkg may have been built with FEATURES=splitdebug
+	if [[ -d "${WORKDIR}/usr/lib/debug" ]] ; then
+		rm -rf "${WORKDIR}/usr/lib/debug" || die
+	fi
+	find "${WORKDIR}/usr/lib" -type d -empty -delete 2>/dev/null # do not die on failure here
+
+	# ffi headers don't get included in the binpkg for some reason
+	for f in "${WORKDIR}/usr/$(get_libdir)/${PN}-${BIN_PV}/include/"{ffi.h,ffitarget.h}
+	do
+		mkdir -p "$(dirname "${f}")"
+		[[ -e "${f}" ]] || ln -sf "$($(tc-getPKG_CONFIG) --cflags-only-I libffi | sed "s/-I//g" | tr -d " ")/$(basename "${f}")" "${f}" || die
+	done
 
 	if use binary; then
 		if use prefix; then
@@ -548,30 +515,15 @@ src_prepare() {
 
 		eapply "${FILESDIR}"/${PN}-9.0.2-CHOST-prefix.patch
 		eapply "${FILESDIR}"/${PN}-9.0.2-darwin.patch
-
-		# Incompatible with ghc-9.0.2-modorigin-semigroup.patch
-		# Below patch should not be needed by ghc-9.2
-		#eapply "${FILESDIR}"/${PN}-9.0.2-modorigin.patch
-
-		# ModUnusable pretty-printing should include the reason
-		#eapply "${FILESDIR}/${PN}-9.0.2-verbose-modunusable.patch"
-
 		# Fixes panic when compiling some packages
 		# https://github.com/gentoo-haskell/gentoo-haskell/issues/1250#issuecomment-1044257595
 		# https://gitlab.haskell.org/ghc/ghc/-/issues/21097
 		eapply "${FILESDIR}/${PN}-9.0.2-modorigin-semigroup.patch"
-
 		# Needed for testing with python-3.10
 		use test && eapply "${FILESDIR}/${PN}-9.0.2-fix-tests-python310.patch"
-
-		#needs a port?
-		#eapply "${FILESDIR}"/${PN}-8.8.1-revert-CPP.patch
 		eapply "${FILESDIR}"/${PN}-8.10.1-allow-cross-bootstrap.patch
-		#eapply "${FILESDIR}"/${PN}-8.10.3-C99-typo-ac270.patch
-
-		# a bunch of crosscompiler patches
-		# needs newer version:
-		#eapply "${FILESDIR}"/${PN}-8.2.1_rc1-hp2ps-cross.patch
+		eapply "${FILESDIR}"/${PN}-9.0.2-disable-unboxed-arrays.patch
+		eapply "${FILESDIR}"/${PN}-9.0.2-llvm-14.patch
 
 		# mingw32 target
 		pushd "${S}/libraries/Win32"
@@ -668,12 +620,11 @@ src_configure() {
 		# User can use EXTRA_ECONF=CC=... to override this default.
 		econf_args+=(
 			AR=${AR}
-			CC=${CTARGET}-${CC}
+			CC=${CC}
 			# these should be inferred by GHC but ghc defaults
 			# to using bundled tools on windows.
 			Windres=${CTARGET}-windres
 			DllWrap=${CTARGET}-dllwrap
-			LlvmTarget=${CTARGET}
 			# we set the linker explicitly below
 			--disable-ld-override
 		)
@@ -682,14 +633,14 @@ src_configure() {
 				# ld.bfd-2.28 does not work for ghc. Force ld.gold
 				# instead. This should be removed once gentoo gets
 				# a fix for R_ARM_COPY bug: https://sourceware.org/PR16177
-				econf_args+=(LD=${LD})
+				econf_args+=(LD=${CTARGET}-ld.gold)
 			;;
 			sparc*)
 				# ld.gold-2.28 does not work for ghc. Force ld.bfd
 				# instead. This should be removed once gentoo gets
 				# a fix for missing --no-relax support bug:
 				# https://sourceware.org/ml/binutils/2017-07/msg00183.html
-				econf_args+=(LD=${LD})
+				econf_args+=(LD=${CTARGET}-ld.bfd)
 			;;
 			*)
 				econf_args+=(LD=${LD})
@@ -725,7 +676,8 @@ src_configure() {
 		econf ${econf_args[@]} \
 			--enable-bootstrap-with-devel-snapshot \
 			$(use_enable elfutils dwarf-unwind) \
-			$(use_enable numa)
+			$(use_enable numa) \
+			--disable-unregisterised # all targets are registerised for now
 
 		if [[ ${PV} == *9999* ]]; then
 			GHC_PV="$(grep 'S\[\"PACKAGE_VERSION\"\]' config.status | sed -e 's@^.*=\"\(.*\)\"@\1@')"
@@ -781,6 +733,8 @@ src_install() {
 		#    /usr/bin/install: cannot create regular file \
 		#           '/tmp/portage-tmpdir/portage/cross-armv7a-unknown-linux-gnueabi/ghc-9999/image/usr/lib64/armv7a-unknown-linux-gnueabi-ghc-8.3.20170404': No such file or directory
 		emake -j1 install DESTDIR="${D}"
+
+		use llvm && llvmize "${ED}/usr/bin"
 
 		# Skip for cross-targets as they all share target location:
 		# /usr/share/doc/ghc-9999/
