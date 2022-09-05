@@ -1,0 +1,13 @@
+diff --git a/libraries/Cabal/Cabal/Distribution/Simple/Program/GHC.hs b/libraries/Cabal/Cabal/Distribution/Simple/Program/GHC.hs
+index 4d64f76..f86e52f 100644
+--- a/libraries/Cabal/Cabal/Distribution/Simple/Program/GHC.hs
++++ b/libraries/Cabal/Cabal/Distribution/Simple/Program/GHC.hs
+@@ -581,7 +581,7 @@ renderGhcOptions comp _platform@(Platform _arch os) opts
+        Nothing                 -> []
+        Just GhcModeCompile     -> ["-c"]
+        Just GhcModeLink        -> []
+-       Just GhcModeMake        -> ["--make"]
++       Just GhcModeMake        -> ["--make", "-fPIC"]
+        Just GhcModeInteractive -> ["--interactive"]
+        Just GhcModeAbiHash     -> ["--abi-hash"]
+ --     Just GhcModeDepAnalysis -> ["-M"]
