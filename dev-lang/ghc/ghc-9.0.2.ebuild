@@ -524,6 +524,8 @@ src_prepare() {
 		eapply "${FILESDIR}"/${PN}-8.10.1-allow-cross-bootstrap.patch
 		eapply "${FILESDIR}"/${PN}-9.0.2-disable-unboxed-arrays.patch
 		eapply "${FILESDIR}"/${PN}-9.0.2-llvm-14.patch
+		# Fixes 'relocation R_X86_64_32S cannot be used against local symbol; recompile with -fPIC'
+		eapply "${FILESDIR}"/${PN}-9.0.2-enable-fPIC-cabal.patch
 
 		# mingw32 target
 		pushd "${S}/libraries/Win32"
