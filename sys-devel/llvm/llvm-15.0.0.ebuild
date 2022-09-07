@@ -1,9 +1,9 @@
 # Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
-PYTHON_COMPAT=( python3_{8..10} )
+PYTHON_COMPAT=( python3_{8..11} )
 inherit cmake llvm.org multilib-minimal pax-utils python-any-r1 \
 	toolchain-funcs
 
@@ -18,7 +18,7 @@ HOMEPAGE="https://llvm.org/"
 
 LICENSE="Apache-2.0-with-LLVM-exceptions UoI-NCSA BSD public-domain rc"
 SLOT="$(ver_cut 1)"
-KEYWORDS=""
+KEYWORDS="~amd64 ~x86"
 IUSE="+binutils-plugin debug doc exegesis libedit +libffi ncurses polly test xar xml z3"
 RESTRICT="!test? ( test )"
 
@@ -32,10 +32,14 @@ RDEPEND="
 	polly? ( sys-libs/polly:${SLOT}= )
 	xar? ( app-arch/xar )
 	xml? ( dev-libs/libxml2:2=[${MULTILIB_USEDEP}] )
-	z3? ( >=sci-mathematics/z3-4.7.1:0=[${MULTILIB_USEDEP}] )"
-DEPEND="${RDEPEND}
-	binutils-plugin? ( sys-libs/binutils-libs )"
+	z3? ( >=sci-mathematics/z3-4.7.1:0=[${MULTILIB_USEDEP}] )
+"
+DEPEND="
+	${RDEPEND}
+	binutils-plugin? ( sys-libs/binutils-libs )
+"
 BDEPEND="
+	${PYTHON_DEPS}
 	dev-lang/perl
 	>=dev-util/cmake-3.16
 	sys-devel/gnuconfig
@@ -51,14 +55,18 @@ BDEPEND="
 	${PYTHON_DEPS}"
 # There are no file collisions between these versions but having :0
 # installed means llvm-config there will take precedence.
-RDEPEND="${RDEPEND}
-	!sys-devel/llvm:0"
-PDEPEND="sys-devel/llvm-common
-	binutils-plugin? ( >=sys-devel/llvmgold-${SLOT} )"
+RDEPEND="
+	${RDEPEND}
+	!sys-devel/llvm:0
+"
+PDEPEND="
+	sys-devel/llvm-common
+	binutils-plugin? ( >=sys-devel/llvmgold-${SLOT} )
+"
 
-LLVM_COMPONENTS=( llvm third-party )
-LLVM_MANPAGES=build
-LLVM_PATCHSET=9999-1
+LLVM_COMPONENTS=( llvm cmake third-party )
+LLVM_MANPAGES=pregenerated
+LLVM_PATCHSET=${PV/_/-}-r1
 LLVM_USE_TARGETS=provide
 llvm.org_set_globals
 
@@ -215,6 +223,7 @@ get_distribution_components() {
 			count
 			not
 			yaml-bench
+			UnicodeNameMappingGenerator
 
 			# tools
 			bugpoint
@@ -236,10 +245,13 @@ get_distribution_components() {
 			llvm-cxxdump
 			llvm-cxxfilt
 			llvm-cxxmap
+			llvm-debuginfod
+			llvm-debuginfod-find
 			llvm-diff
 			llvm-dis
 			llvm-dlltool
 			llvm-dwarfdump
+			llvm-dwarfutil
 			llvm-dwp
 			llvm-exegesis
 			llvm-extract
@@ -272,6 +284,7 @@ get_distribution_components() {
 			llvm-readelf
 			llvm-readobj
 			llvm-reduce
+			llvm-remark-size-diff
 			llvm-rtdyld
 			llvm-sim
 			llvm-size
@@ -281,6 +294,7 @@ get_distribution_components() {
 			llvm-strip
 			llvm-symbolizer
 			llvm-tapi-diff
+			llvm-tli-checker
 			llvm-undname
 			llvm-windres
 			llvm-xray
@@ -444,6 +458,9 @@ multilib_src_configure() {
 	use debug || local -x CPPFLAGS="${CPPFLAGS} -DNDEBUG"
 	cmake_src_configure
 
+	grep -q -E "^CMAKE_PROJECT_VERSION_MAJOR(:.*)?=$(ver_cut 1)$" \
+			CMakeCache.txt ||
+		die "Incorrect version, did you update _LLVM_MASTER_MAJOR?"
 	multilib_is_native_abi && check_distribution_components
 }
 
