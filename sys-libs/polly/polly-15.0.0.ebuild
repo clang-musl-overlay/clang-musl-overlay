@@ -1,9 +1,9 @@
 # Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
-PYTHON_COMPAT=( python3_{8..10} )
+PYTHON_COMPAT=( python3_{8..11} )
 inherit cmake linux-info llvm llvm.org python-single-r1
 
 DESCRIPTION="Polyhedral optimizations for LLVM"
@@ -11,14 +11,16 @@ HOMEPAGE="https://llvm.org/"
 
 LICENSE="Apache-2.0-with-LLVM-exceptions UoI-NCSA"
 SLOT="$(ver_cut 1)"
+KEYWORDS="~amd64 ~x86"
 IUSE="test"
 RESTRICT="!test? ( test )"
 
 PDEPEND="sys-devel/llvm:${SLOT}="
 BDEPEND="
+	${PYTHON_DEPS}
 	>=dev-util/cmake-3.16
 	test? ( >=dev-python/lit-9.0.1 )
-	${PYTHON_DEPS}"
+"
 
 LLVM_COMPONENTS=( polly cmake )
 llvm.org_set_globals
