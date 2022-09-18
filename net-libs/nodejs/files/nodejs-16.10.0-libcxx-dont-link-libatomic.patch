@@ -1,0 +1,12 @@
+--- a/node.gyp
++++ b/node.gyp
+@@ -116,9 +116,6 @@
+           '-Wl,-bnoerrmsg',
+         ],
+       }],
+-      ['OS == "linux" and llvm_version != "0.0"', {
+-        'libraries': ['-latomic'],
+-      }],
+     ],
+   },
+ 
