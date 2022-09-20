@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{8..10} )
+PYTHON_COMPAT=( python3_{8..11} )
 inherit cmake linux-info llvm llvm.org python-single-r1
 
 DESCRIPTION="Polyhedral optimizations for LLVM"
