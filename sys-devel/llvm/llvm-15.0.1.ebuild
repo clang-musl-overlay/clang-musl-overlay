@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{8..10} )
+PYTHON_COMPAT=( python3_{8..11} )
 inherit cmake llvm.org multilib-minimal pax-utils python-any-r1 \
 	toolchain-funcs
 
@@ -61,12 +61,13 @@ RDEPEND="
 "
 PDEPEND="
 	sys-devel/llvm-common
+	sys-devel/llvm-toolchain-symlinks:${SLOT}
 	binutils-plugin? ( >=sys-devel/llvmgold-${SLOT} )
 "
 
 LLVM_COMPONENTS=( llvm cmake third-party )
 LLVM_MANPAGES=pregenerated
-LLVM_PATCHSET=${PV}-r1
+LLVM_PATCHSET=${PV/_/-}
 LLVM_USE_TARGETS=provide
 llvm.org_set_globals
 
@@ -178,10 +179,6 @@ src_prepare() {
 	check_live_ebuild
 
 	llvm.org_src_prepare
-
-	# remove regressing test
-	# https://github.com/llvm/llvm-project/issues/55761
-	rm test/Other/ChangePrinters/DotCfg/print-changed-dot-cfg.ll || die
 }
 
 # Is LLVM being linked against libc++?
@@ -227,6 +224,7 @@ get_distribution_components() {
 			count
 			not
 			yaml-bench
+			UnicodeNameMappingGenerator
 
 			# tools
 			bugpoint
@@ -248,11 +246,13 @@ get_distribution_components() {
 			llvm-cxxdump
 			llvm-cxxfilt
 			llvm-cxxmap
+			llvm-debuginfod
 			llvm-debuginfod-find
 			llvm-diff
 			llvm-dis
 			llvm-dlltool
 			llvm-dwarfdump
+			llvm-dwarfutil
 			llvm-dwp
 			llvm-exegesis
 			llvm-extract
@@ -285,6 +285,7 @@ get_distribution_components() {
 			llvm-readelf
 			llvm-readobj
 			llvm-reduce
+			llvm-remark-size-diff
 			llvm-rtdyld
 			llvm-sim
 			llvm-size
