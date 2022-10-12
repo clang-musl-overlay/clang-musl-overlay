@@ -50,7 +50,7 @@ DEPEND="${RDEPEND}"
 PATCHES=(
 	"${FILESDIR}"/${PN}-12.22.5-shared_c-ares_nameser_h.patch
 	"${FILESDIR}"/${PN}-15.2.0-global-npm-config.patch
-	"${FILESDIR}"/nodejs-18.9.0-clang-fix-libatomic.patch
+	"${FILESDIR}"/nodejs-16.10.0-libcxx-dont-link-libatomic.patch 
 )
 
 # These are measured on a loong machine with -ggdb on, and only checked
