@@ -67,7 +67,7 @@ PDEPEND="
 
 LLVM_COMPONENTS=( llvm cmake third-party )
 LLVM_MANPAGES=pregenerated
-LLVM_PATCHSET=${PV/_/-}
+LLVM_PATCHSET=${PV/_/-}-r2
 LLVM_USE_TARGETS=provide
 llvm.org_set_globals
 
