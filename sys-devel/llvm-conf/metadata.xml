@@ -2,8 +2,8 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
 	<maintainer type="project">
-		<email>toolchain@gentoo.org</email>
-		<name>Gentoo Toolchain Project</name>
+		<email>thecyberduck@tutanota.com</email>
+		<name>Gentoo Clang/Musl Project</name>
 	</maintainer>
 	<use>
 		<flag name="clang-wrappers">Manage wrappers in /usr/bin to use clang as default compiler. Otherwise ignore them.</flag>
