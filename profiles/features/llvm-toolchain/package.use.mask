@@ -1,3 +1,6 @@
 # unmask clang useflag for firefox on musl
 # See Bug #829033 for more info
 www-client/firefox -clang
+
+# unmaask necessay use flags for dev-lang/rust
+dev-lang/rust -llvm-libunwind -system-bootstrap -system-llvm
