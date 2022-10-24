@@ -20,8 +20,6 @@ IUSE="+binutils-wrappers +clang-wrappers +native-symlinks"
 
 RDEPEND="
 	>=sys-apps/gentoo-functions-0.10
-	sys-devel/llvm
-	clang-wrappers? ( sys-devel/clang )
 "
 
 _emake() {
@@ -48,4 +46,9 @@ pkg_postinst() {
 	if ! llvm-conf -C -c >/dev/null 2>&1  ; then
 		llvm-conf latest
 	fi
+}
+
+pkg_postrm() {
+	# remove /etc/env.d/60llvm
+	test -f /etc/env.d/60llvm && rm -f /etc/env.d/60llvm
 }

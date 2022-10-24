@@ -8,7 +8,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://github.com/clang-musl-overlay/llvm-conf/archive/refs/tags/v${PV}.tar.gz"
-	KEYWORDS="~amd64"
+	KEYWORDS="amd64"
 fi
 
 DESCRIPTION="Utility to manage llvm profiles"
@@ -18,7 +18,9 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE="+binutils-wrappers +clang-wrappers +native-symlinks"
 
-RDEPEND=">=sys-apps/gentoo-functions-0.10"
+RDEPEND="
+	>=sys-apps/gentoo-functions-0.10
+"
 
 _emake() {
 	emake \
@@ -44,4 +46,9 @@ pkg_postinst() {
 	if ! llvm-conf -C -c >/dev/null 2>&1  ; then
 		llvm-conf latest
 	fi
+}
+
+pkg_postrm() {
+	# remove /etc/env.d/60llvm
+	test -f /etc/env.d/60llvm && rm -f /etc/env.d/60llvm
 }
