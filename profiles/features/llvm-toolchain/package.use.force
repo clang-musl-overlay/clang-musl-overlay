@@ -1,3 +1,4 @@
+# disable LLVM_TARGETS
 sys-devel/clang -llvm_targets_AArch64 -llvm_targets_AMDGPU
 sys-devel/clang -llvm_targets_ARM -llvm_targets_AVR
 sys-devel/clang -llvm_targets_BPF -llvm_targets_Hexagon
@@ -16,3 +17,9 @@ sys-devel/llvm -llvm_targets_PowerPC -llvm_targets_RISCV
 sys-devel/llvm -llvm_targets_Sparc -llvm_targets_SystemZ
 sys-devel/llvm -llvm_targets_VE -llvm_targets_WebAssembly
 sys-devel/llvm -llvm_targets_XCore
+
+# llvm-conf utility to manage llvm/clang profiles
+sys-devel/llvm-conf binutils-wrappers clang-wrappers native-symlinks
+
+# rust can't be built with rust-bin after changing to llvm-libunwind
+dev-lang/rust system-bootstrap system-llvm
