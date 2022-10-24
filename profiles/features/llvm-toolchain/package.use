@@ -7,12 +7,3 @@ sys-devel/clang-runtime -sanitize
 # enable llvm-libunwind for libcxx
 sys-libs/libcxx libunwind
 sys-libs/libcxxabi libunwind
-
-# libgcrypt doesn't like optimizations
-dev-libs/libgcrypt o-flag-munging
-
-# llvm-conf utility to manage llvm/clang profiles
-sys-devel/llvm-conf binutils-wrappers clang-wrappers native-symlinks
-
-# rust can't be built with rust-bin after changing to llvm-libunwind
-dev-lang/rust llvm-libunwind system-bootstrap system-llvm
