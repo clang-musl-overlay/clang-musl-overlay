@@ -5,7 +5,7 @@ EAPI=8
 
 inherit flag-o-matic pax-utils toolchain-funcs
 
-BV_AMD64=2.2.9
+BV_AMD64=2.2.11
 
 DESCRIPTION="Steel Bank Common Lisp (SBCL) is an implementation of ANSI Common Lisp"
 HOMEPAGE="https://www.sbcl.org/ http://sbcl.sourceforge.net/"
@@ -16,10 +16,9 @@ SRC_URI="mirror://sourceforge/sbcl/${P}-source.tar.bz2
 LICENSE="MIT"
 SLOT="0/${PV}"
 KEYWORDS="-* ~amd64"
-IUSE="capstone debug doc source system-bootstrap +threads +unicode +zstd"
+IUSE="debug doc source system-bootstrap +threads +unicode +zstd"
 
-CDEPEND=">=dev-lisp/asdf-3.3:=
-	capstone? ( dev-libs/capstone:0/4 )"
+CDEPEND=">=dev-lisp/asdf-3.3:="
 # bug #843851
 BDEPEND="${CDEPEND}
 		doc? ( sys-apps/texinfo >=media-gfx/graphviz-2.26.0 )"
@@ -120,8 +119,6 @@ src_prepare() {
 	sed "s,/usr/local/lib,${EPREFIX}/usr/$(get_libdir),g" -i src/runtime/runtime.c || die
 	# change location of /etc/sbclrc ...
 	sed  "s,/etc/sbclrc,${EPREFIX}/etc/sbclrc,g" -i src/code/toplevel.lisp || die
-
-	use capstone || rm -rf contrib/sb-capstone
 
 	find . -type f -name .cvsignore -delete
 }
