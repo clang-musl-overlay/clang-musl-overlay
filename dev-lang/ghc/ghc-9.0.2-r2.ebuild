@@ -81,7 +81,7 @@ IUSE="big-endian +doc elfutils ghcbootstrap ghcmakebinary +gmp +llvm numa profil
 IUSE+=" binary"
 RESTRICT="!test? ( test )"
 
-LLVM_MAX_SLOT="14"
+LLVM_MAX_SLOT="15"
 RDEPEND="
 	>=dev-lang/perl-5.6.1
 	dev-libs/gmp:0=
