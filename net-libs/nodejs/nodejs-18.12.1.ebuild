@@ -1,10 +1,10 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
 CONFIG_CHECK="~ADVISE_SYSCALLS"
-PYTHON_COMPAT=( python3_{8..11} )
+PYTHON_COMPAT=( python3_{9..11} )
 PYTHON_REQ_USE="threads(+)"
 
 inherit bash-completion-r1 check-reqs flag-o-matic linux-info pax-utils python-any-r1 toolchain-funcs xdg-utils
@@ -20,7 +20,7 @@ if [[ ${PV} == *9999 ]]; then
 else
 	SRC_URI="https://nodejs.org/dist/v${PV}/node-v${PV}.tar.xz"
 	SLOT="0/$(ver_cut 1)"
-	KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~x86 ~amd64-linux ~x64-macos"
+	KEYWORDS="amd64 arm arm64 ~loong ppc64 ~riscv x86 ~amd64-linux ~x64-macos"
 	S="${WORKDIR}/node-v${PV}"
 fi
 
