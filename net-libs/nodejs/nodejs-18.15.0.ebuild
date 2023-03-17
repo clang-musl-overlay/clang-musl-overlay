@@ -20,7 +20,7 @@ if [[ ${PV} == *9999 ]]; then
 else
 	SRC_URI="https://nodejs.org/dist/v${PV}/node-v${PV}.tar.xz"
 	SLOT="0/$(ver_cut 1)"
-	KEYWORDS="amd64 arm arm64 ~loong ppc64 ~riscv x86 ~amd64-linux ~x64-macos"
+	KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~x86 ~amd64-linux ~x64-macos"
 	S="${WORKDIR}/node-v${PV}"
 fi
 
@@ -33,7 +33,7 @@ REQUIRED_USE="inspector? ( icu ssl )
 RESTRICT="!test? ( test )"
 
 RDEPEND=">=app-arch/brotli-1.0.9:=
-	>=dev-libs/libuv-1.40.0:=
+	>=dev-libs/libuv-1.44.0:=
 	>=net-dns/c-ares-1.17.2:=
 	>=net-libs/nghttp2-1.41.0:=
 	sys-libs/zlib
@@ -49,8 +49,6 @@ DEPEND="${RDEPEND}"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-12.22.5-shared_c-ares_nameser_h.patch
-	"${FILESDIR}"/${PN}-15.2.0-global-npm-config.patch
-	"${FILESDIR}"/${PN}-gcc-13.patch
 	"${FILESDIR}"/${PN}-16.10.0-libcxx-dont-link-libatomic.patch
 )
 
@@ -202,6 +200,8 @@ src_install() {
 
 	if use npm; then
 		keepdir /etc/npm
+		echo "NPM_CONFIG_GLOBALCONFIG=${EPREFIX}/etc/npm/npmrc" > "${T}"/50npm
+		doenvd "${T}"/50npm
 
 		# Install bash completion for `npm`
 		local tmp_npm_completion_file="$(TMPDIR="${T}" mktemp -t npm.XXXXXXXXXX)"
@@ -236,6 +236,7 @@ src_install() {
 }
 
 src_test() {
+	rm -f "${S}"/tests/parallel/test-dns-setserver-when-querying.js
 	if has usersandbox ${FEATURES}; then
 		rm -f "${S}"/test/parallel/test-fs-mkdir.js
 		ewarn "You are emerging ${PN} with 'usersandbox' enabled. Excluding tests known to fail in this mode." \
@@ -244,4 +245,11 @@ src_test() {
 
 	out/${BUILDTYPE}/cctest || die
 	"${EPYTHON}" tools/test.py --mode=${BUILDTYPE,,} --flaky-tests=dontcare -J message parallel sequential || die
+}
+
+pkg_postinst() {
+	if use npm; then
+	    ewarn "remember to run: source /etc/profile if you plan to use nodejs"
+		ewarn "	in your current shell"
+	fi
 }
