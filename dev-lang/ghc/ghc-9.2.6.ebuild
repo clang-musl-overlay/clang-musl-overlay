@@ -13,7 +13,7 @@ if [[ ${CTARGET} = ${CHOST} ]] ; then
 	fi
 fi
 
-PYTHON_COMPAT=( python3_{8..10} )
+PYTHON_COMPAT=( python3_{9..11} )
 inherit python-any-r1
 inherit autotools bash-completion-r1 flag-o-matic ghc-package
 inherit multiprocessing pax-utils toolchain-funcs prefix
@@ -81,7 +81,7 @@ IUSE="big-endian +doc elfutils ghcbootstrap ghcmakebinary +gmp +llvm numa profil
 IUSE+=" binary"
 RESTRICT="!test? ( test )"
 
-LLVM_MAX_SLOT="15"
+LLVM_MAX_SLOT="16"
 RDEPEND="
 	>=dev-lang/perl-5.6.1
 	dev-libs/gmp:0=
@@ -518,7 +518,7 @@ src_prepare() {
 		#use test && eapply "${FILESDIR}/${PN}-9.0.2-fix-tests-python310.patch"
 		eapply "${FILESDIR}"/${PN}-8.10.1-allow-cross-bootstrap.patch
 		#eapply "${FILESDIR}"/${PN}-9.0.2-disable-unboxed-arrays.patch
-		eapply "${FILESDIR}"/${PN}-9.2.6-llvm-15.patch
+		eapply "${FILESDIR}"/${PN}-9.2.6-llvm-16.patch
 		# Fixes 'relocation R_X86_64_32S cannot be used against local symbol; recompile with -fPIC'
 		eapply "${FILESDIR}"/${PN}-9.2.6-fix-alignment-of-capability.patch
 		eapply "${FILESDIR}"/${PN}-9.2.6-enable-PIC.patch
