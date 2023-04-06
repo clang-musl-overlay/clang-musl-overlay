@@ -5,7 +5,7 @@ EAPI=8
 
 PYTHON_COMPAT=( python3_{9..11} )
 inherit cmake llvm.org multilib-minimal pax-utils python-any-r1 \
-	toolchain-funcs
+	toolchain-funcs flag-o-matic
 
 DESCRIPTION="Low Level Virtual Machine"
 HOMEPAGE="https://llvm.org/"
@@ -18,9 +18,9 @@ HOMEPAGE="https://llvm.org/"
 
 LICENSE="Apache-2.0-with-LLVM-exceptions UoI-NCSA BSD public-domain rc"
 SLOT="${LLVM_MAJOR}/${LLVM_SOABI}"
-KEYWORDS="~loong"
+KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86 ~amd64-linux ~ppc-macos ~x64-macos"
 IUSE="
-	+binutils-plugin debug doc exegesis libedit +libffi ncurses polly test xar
+	+binutils-plugin debug doc exegesis libedit +libffi ncurses test xar
 	xml z3 zstd
 "
 RESTRICT="!test? ( test )"
@@ -31,7 +31,6 @@ RDEPEND="
 	libedit? ( dev-libs/libedit:0=[${MULTILIB_USEDEP}] )
 	libffi? ( >=dev-libs/libffi-3.0.13-r1:0=[${MULTILIB_USEDEP}] )
 	ncurses? ( >=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}] )
-	polly? ( sys-libs/polly:${LLVM_MAJOR}= )
 	xar? ( app-arch/xar )
 	xml? ( dev-libs/libxml2:2=[${MULTILIB_USEDEP}] )
 	z3? ( >=sci-mathematics/z3-4.7.1:0=[${MULTILIB_USEDEP}] )
@@ -325,6 +324,8 @@ get_distribution_components() {
 }
 
 multilib_src_configure() {
+	tc-is-gcc && filter-lto # GCC miscompiles LLVM, bug #873670
+
 	local ffi_cflags ffi_ldflags
 	if use libffi; then
 		ffi_cflags=$($(tc-getPKG_CONFIG) --cflags-only-I libffi)
@@ -358,6 +359,8 @@ multilib_src_configure() {
 		-DLLVM_ENABLE_LIBXML2=$(usex xml)
 		-DLLVM_ENABLE_ASSERTIONS=$(usex debug)
 		-DLLVM_ENABLE_LIBPFM=$(usex exegesis)
+		-DLLVM_ENABLE_EH=ON
+		-DLLVM_ENABLE_RTTI=ON
 		-DLLVM_ENABLE_Z3_SOLVER=$(usex z3)
 		-DLLVM_ENABLE_ZSTD=$(usex zstd)
 
@@ -420,16 +423,6 @@ multilib_src_configure() {
 		)
 	fi
 
-	if tc-is-cross-compiler; then
-		local tblgen="${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/bin/llvm-tblgen"
-		[[ -x "${tblgen}" ]] \
-			|| die "${tblgen} not found or usable"
-		mycmakeargs+=(
-			-DCMAKE_CROSSCOMPILING=ON
-			-DLLVM_TABLEGEN="${tblgen}"
-		)
-	fi
-
 	# workaround BMI bug in gcc-7 (fixed in 7.4)
 	# https://bugs.gentoo.org/649880
 	# apply only to x86, https://bugs.gentoo.org/650506
@@ -443,12 +436,6 @@ multilib_src_configure() {
 	# LLVM can have very high memory consumption while linking,
 	# exhausting the limit on 32-bit linker executable
 	use x86 && local -x LDFLAGS="${LDFLAGS} -Wl,--no-keep-memory"
-
-    # Link polly against LLVM, #715612
-    if use polly; then
-        local -x LDFLAGS="${LDFLAGS} \
-            -L\"${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/lib\" -lPolly -lPollyISL"
-    fi
 
 	# LLVM_ENABLE_ASSERTIONS=NO does not guarantee this for us, #614844
 	use debug || local -x CPPFLAGS="${CPPFLAGS} -DNDEBUG"
