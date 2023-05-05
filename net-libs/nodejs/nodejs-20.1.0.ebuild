@@ -7,7 +7,7 @@ CONFIG_CHECK="~ADVISE_SYSCALLS"
 PYTHON_COMPAT=( python3_{9..11} )
 PYTHON_REQ_USE="threads(+)"
 
-inherit bash-completion-r1 check-reqs flag-o-matic linux-info pax-utils python-any-r1 toolchain-funcs xdg-utils
+inherit bash-completion-r1 check-reqs flag-o-matic linux-info ninja-utils pax-utils python-any-r1 toolchain-funcs xdg-utils
 
 DESCRIPTION="A JavaScript runtime built on Chrome's V8 JavaScript engine"
 HOMEPAGE="https://nodejs.org/"
@@ -128,6 +128,7 @@ src_configure() {
 	append-atomic-flags
 
 	local myconf=(
+	--ninja
 		--shared-brotli
 		--shared-cares
 		--shared-libuv
@@ -175,7 +176,7 @@ src_configure() {
 }
 
 src_compile() {
-	emake -C out
+	eninja -C out/${BUILDTYPE}
 }
 
 src_install() {
