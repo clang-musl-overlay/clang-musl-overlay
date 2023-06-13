@@ -28,7 +28,8 @@ IUSE="cpu_flags_x86_sse2 debug doc +icu inspector lto +npm pax-kernel +snapshot 
 REQUIRED_USE="inspector? ( icu ssl )
 	npm? ( ssl )
 	system-icu? ( icu )
-	system-ssl? ( ssl )"
+	system-ssl? ( ssl )
+	x86? ( cpu_flags_x86_sse2 )"
 
 RESTRICT="!test? ( test )"
 
@@ -47,6 +48,8 @@ BDEPEND="${PYTHON_DEPS}
 DEPEND="${RDEPEND}"
 
 PATCHES=(
+	"${FILESDIR}"/${P}-gcc14.patch
+	"${FILESDIR}"/${P}-simdutf-2.3.14.patch
 	"${FILESDIR}"/${PN}-12.22.5-shared_c-ares_nameser_h.patch
 	"${FILESDIR}"/${PN}-16.10.0-libcxx-dont-link-libatomic.patch
 )
@@ -62,9 +65,6 @@ CHECKREQS_MEMORY="8G"
 CHECKREQS_DISK_BUILD="22G"
 
 pkg_pretend() {
-	(use x86 && ! use cpu_flags_x86_sse2) && \
-		die "Your CPU doesn't support the required SSE2 instruction."
-
 	if [[ ${MERGE_TYPE} != "binary" ]]; then
 		if is-flagq "-g*" && ! is-flagq "-g*0" ; then
 			einfo "Checking for sufficient disk space and memory to build ${PN} with debugging CFLAGS"
