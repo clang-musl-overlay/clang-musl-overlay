@@ -4,8 +4,8 @@
 EAPI=8
 
 PYTHON_COMPAT=( python3_{9..11} )
-inherit cmake llvm.org multilib-minimal pax-utils python-any-r1 \
-	toolchain-funcs
+inherit cmake llvm.org multilib-minimal pax-utils python-any-r1
+inherit toolchain-funcs
 
 DESCRIPTION="Low Level Virtual Machine"
 HOMEPAGE="https://llvm.org/"
@@ -71,6 +71,7 @@ PDEPEND="
 LLVM_COMPONENTS=( llvm cmake )
 LLVM_TEST_COMPONENTS=( third-party )
 LLVM_MANPAGES=1
+LLVM_PATCHSET=${PV}
 LLVM_USE_TARGETS=provide
 llvm.org_set_globals
 
