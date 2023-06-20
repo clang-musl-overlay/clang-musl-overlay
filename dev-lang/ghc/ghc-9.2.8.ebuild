@@ -568,7 +568,7 @@ src_configure() {
 		echo "BUILD_MAN = $(usex doc YES NO)" >> mk/build.mk
 
 		# this controls presence on 'xhtml' and 'haddock' in final install
-		echo "HADDOCK_DOCS       = NO" >> mk/build.mk
+		echo "HADDOCK_DOCS       = YES" >> mk/build.mk
 
 		# not used outside of ghc's test
 		if [[ -n ${GHC_BUILD_DPH} ]]; then
@@ -700,8 +700,8 @@ src_compile() {
 			# if is_native; then
 				# non-native build does not build haddock
 				# due to HADDOCK_DOCS=NO, but it could.
-				# emake utils/haddock/dist/build/tmp/haddock
-				# pax-mark -m utils/haddock/dist/build/tmp/haddock
+				emake utils/haddock/dist/build/tmp/haddock
+				pax-mark -m utils/haddock/dist/build/tmp/haddock
 			# fi
 		fi
 		# 3. and then all the rest
