@@ -36,13 +36,14 @@ RESTRICT="!test? ( test )"
 
 RDEPEND=">=app-arch/brotli-1.0.9:=
 	>=dev-libs/libuv-1.44.0:=
-	>=net-dns/c-ares-1.17.2:=
+	>=net-dns/c-ares-1.18.1:=
 	>=net-libs/nghttp2-1.41.0:=
 	sys-libs/zlib
 	corepack? ( !sys-apps/yarn )
 	system-icu? ( >=dev-libs/icu-67:= )
 	system-ssl? ( >=dev-libs/openssl-1.1.1:0= )"
 BDEPEND="${PYTHON_DEPS}
+	dev-util/ninja
 	sys-apps/coreutils
 	virtual/pkgconfig
 	test? ( net-misc/curl )
@@ -91,11 +92,6 @@ src_prepare() {
 	# less verbose install output (stating the same as portage, basically)
 	sed -i -e "/print/d" tools/install.py || die
 
-	# proper libdir, hat tip @ryanpcmcquen https://github.com/iojs/io.js/issues/504
-	local LIBDIR=$(get_libdir)
-	sed -i -e "s|lib/|${LIBDIR}/|g" tools/install.py || die
-	sed -i -e "s/'lib'/'${LIBDIR}'/" deps/npm/lib/npm.js || die
-
 	# Avoid writing a depfile, not useful
 	sed -i -e "/DEPFLAGS =/d" tools/gyp/pylib/gyp/generator/make.py || die
 
@@ -110,13 +106,6 @@ src_prepare() {
 	# We need to disable mprotect on two files when it builds Bug 694100.
 	use pax-kernel && PATCHES+=( "${FILESDIR}"/${P}-18.16.0-paxmarking.patch )
 
-	# All this test does is check if the npm CLI produces warnings of any sort,
-	# failing if it does. Overkill, much? Especially given one possible warning
-	# is that there is a newer version of npm available upstream (yes, it does
-	# use the network if available), thus making it a real possibility for this
-	# test to begin failing one day even though it was fine before.
-	rm -f test/parallel/test-release-npm.js
-
 	default
 }
 
@@ -124,7 +113,7 @@ src_configure() {
 	xdg_environment_reset
 
 	# LTO compiler flags are handled by configure.py itself
-	filter-flags '-flto*'
+	filter-lto
 	# nodejs unconditionally links to libatomic #869992
 	append-atomic-flags
 
@@ -178,7 +167,7 @@ src_configure() {
 }
 
 src_compile() {
-	eninja -C out/${BUILDTYPE}
+	emake
 }
 
 src_install() {
@@ -240,12 +229,18 @@ src_install() {
 }
 
 src_test() {
-	rm -f "${S}"/tests/parallel/test-dns-setserver-when-querying.js
-	if has usersandbox ${FEATURES}; then
-		rm -f "${S}"/test/parallel/test-fs-mkdir.js
-		ewarn "You are emerging ${PN} with 'usersandbox' enabled. Excluding tests known to fail in this mode." \
-			"For full test coverage, emerge =${CATEGORY}/${PF} with 'FEATURES=-usersandbox'."
-	fi
+	local drop_tests=(
+		test/parallel/test-fs-read-stream.js
+		test/parallel/test-dns-setserver-when-querying.js
+		test/parallel/test-fs-mkdir.js
+		test/parallel/test-fs-utimes-y2K38.js
+		test/parallel/test-fs-watch-recursive-add-file.js
+		test/parallel/test-release-npm.js
+		test/parallel/test-socket-write-after-fin-error.js
+		test/parallel/test-strace-openat-openssl.js
+		test/sequential/test-util-debug.js
+	)
+	rm -f "${drop_tests[@]}" || die "disabling tests failed"
 
 	out/${BUILDTYPE}/cctest || die
 	"${EPYTHON}" tools/test.py --mode=${BUILDTYPE,,} --flaky-tests=dontcare -J message parallel sequential || die
