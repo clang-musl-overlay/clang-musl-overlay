@@ -3,7 +3,8 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=( python3_{10..12} )
+
 inherit cmake llvm.org multilib-minimal pax-utils python-any-r1
 inherit toolchain-funcs
 
@@ -18,15 +19,19 @@ HOMEPAGE="https://llvm.org/"
 
 LICENSE="Apache-2.0-with-LLVM-exceptions UoI-NCSA BSD public-domain rc"
 SLOT="${LLVM_MAJOR}/${LLVM_SOABI}"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~x86" 
 IUSE="
-	+binutils-plugin debug doc exegesis libedit +libffi ncurses polly test xar
-	xml z3 zstd
+	+binutils-plugin debug debuginfod doc exegesis libedit +libffi
+	ncurses polly test xar xml z3 zstd
 "
 RESTRICT="!test? ( test )"
 
 RDEPEND="
 	sys-libs/zlib:0=[${MULTILIB_USEDEP}]
+	debuginfod? (
+		net-misc/curl:=
+		dev-cpp/cpp-httplib:=
+	)
 	exegesis? ( dev-libs/libpfm:= )
 	libedit? ( dev-libs/libedit:0=[${MULTILIB_USEDEP}] )
 	libffi? ( >=dev-libs/libffi-3.0.13-r1:0=[${MULTILIB_USEDEP}] )
@@ -68,8 +73,7 @@ PDEPEND="
 	binutils-plugin? ( >=sys-devel/llvmgold-${LLVM_MAJOR} )
 "
 
-LLVM_COMPONENTS=( llvm cmake )
-LLVM_TEST_COMPONENTS=( third-party )
+LLVM_COMPONENTS=( llvm cmake third-party )
 LLVM_MANPAGES=1
 LLVM_USE_TARGETS=provide
 llvm.org_set_globals
@@ -127,6 +131,9 @@ check_distribution_components() {
 						;;
 					# TableGen lib + deps
 					LLVMDemangle|LLVMSupport|LLVMTableGen)
+						;;
+					# testing libraries
+					LLVMTestingAnnotations|LLVMTestingSupport)
 						;;
 					# static libs
 					LLVM*)
@@ -204,6 +211,12 @@ get_distribution_components() {
 		LLVMDemangle
 		LLVMSupport
 		LLVMTableGen
+
+		# testing libraries
+		llvm_gtest
+		llvm_gtest_main
+		LLVMTestingAnnotations
+		LLVMTestingSupport
 	)
 
 	if multilib_is_native_abi; then
@@ -238,7 +251,6 @@ get_distribution_components() {
 			llvm-cxxfilt
 			llvm-cxxmap
 			llvm-debuginfo-analyzer
-			llvm-debuginfod
 			llvm-debuginfod-find
 			llvm-diff
 			llvm-dis
@@ -319,6 +331,9 @@ get_distribution_components() {
 		use binutils-plugin && out+=(
 			LLVMgold
 		)
+		use debuginfod && out+=(
+			llvm-debuginfod
+		)
 	fi
 
 	printf "%s${sep}" "${out[@]}"
@@ -349,8 +364,9 @@ multilib_src_configure() {
 		-DLLVM_TARGETS_TO_BUILD=""
 		-DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="${LLVM_TARGETS// /;}"
 		-DLLVM_INCLUDE_BENCHMARKS=OFF
-		-DLLVM_INCLUDE_TESTS=$(usex test)
+		-DLLVM_INCLUDE_TESTS=ON
 		-DLLVM_BUILD_TESTS=$(usex test)
+		-DLLVM_INSTALL_GTEST=ON
 
 		-DLLVM_ENABLE_FFI=$(usex libffi)
 		-DLLVM_ENABLE_LIBEDIT=$(usex libedit)
@@ -362,6 +378,8 @@ multilib_src_configure() {
 		-DLLVM_ENABLE_RTTI=ON
 		-DLLVM_ENABLE_Z3_SOLVER=$(usex z3)
 		-DLLVM_ENABLE_ZSTD=$(usex zstd)
+		-DLLVM_ENABLE_CURL=$(usex debuginfod)
+		-DLLVM_ENABLE_HTTPLIB=$(usex debuginfod)
 
 		-DLLVM_HOST_TRIPLE="${CHOST}"
 
@@ -426,8 +444,8 @@ multilib_src_configure() {
 		local tblgen="${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/bin/llvm-tblgen"
 		[[ -x "${tblgen}" ]] \
 			|| die "${tblgen} not found or usable"
-		mycmakeargs+=(
-			-DCMAKE_CROSSCOMPILING=ON
+		 mycmakeargs+=(
+		 	-DCMAKE_CROSSCOMPILING=ON
 			-DLLVM_TABLEGEN="${tblgen}"
 		)
 	fi
@@ -446,11 +464,11 @@ multilib_src_configure() {
 	# exhausting the limit on 32-bit linker executable
 	use x86 && local -x LDFLAGS="${LDFLAGS} -Wl,--no-keep-memory"
 
-    # Link polly against LLVM, #715612
-    if use polly; then
-        local -x LDFLAGS="${LDFLAGS} \
-            -L\"${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/lib\" -lPolly -lPollyISL"
-    fi
+	# Link polly against LLVM, #715612
+	if use polly; then
+		local -x LDFLAGS="${LDFLAGS} \
+			-L\"${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/lib\" -lPolly -lPollyISL"
+	fi
 
 	# LLVM_ENABLE_ASSERTIONS=NO does not guarantee this for us, #614844
 	use debug || local -x CPPFLAGS="${CPPFLAGS} -DNDEBUG"
@@ -458,7 +476,7 @@ multilib_src_configure() {
 
 	grep -q -E "^CMAKE_PROJECT_VERSION_MAJOR(:.*)?=${LLVM_MAJOR}$" \
 			CMakeCache.txt ||
-		die "Incorrect version, did you update _LLVM_MASTER_MAJOR?"
+		die "Incorrect version, did you update _LLVM_MAIN_MAJOR?"
 	multilib_is_native_abi && check_distribution_components
 }
 
