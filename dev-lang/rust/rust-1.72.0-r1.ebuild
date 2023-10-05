@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=( python3_{9..12} )
 
 inherit bash-completion-r1 check-reqs estack flag-o-matic llvm multiprocessing \
 	multilib multilib-build python-any-r1 rust-toolchain toolchain-funcs verify-sig
@@ -19,10 +19,12 @@ else
 	SLOT="stable/${ABI_VER}"
 	MY_P="rustc-${PV}"
 	SRC="${MY_P}-src.tar.xz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~riscv ~sparc ~x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~loong ~mips ~ppc ~ppc64 ~riscv ~sparc ~x86"
 fi
 
-RUST_STAGE0_VERSION="1.$(($(ver_cut 2) - 1)).2"
+# Temporarily set to 1.72.0 since it fixed issues in the stdlib that prevented bootstrapping on musl 1.2.4. Set back to
+# normal in 1.73.0.
+RUST_STAGE0_VERSION="${PV}"
 
 DESCRIPTION="Systems programming language from Mozilla"
 HOMEPAGE="https://www.rust-lang.org/"
@@ -34,14 +36,14 @@ SRC_URI="
 "
 
 # keep in sync with llvm ebuild of the same version as bundled one.
-ALL_LLVM_TARGETS=( AArch64 AMDGPU ARM AVR BPF Hexagon Lanai Mips MSP430
-	NVPTX PowerPC RISCV Sparc SystemZ WebAssembly X86 XCore )
+ALL_LLVM_TARGETS=( AArch64 AMDGPU ARM AVR BPF Hexagon Lanai LoongArch Mips MSP430
+	NVPTX PowerPC RISCV Sparc SystemZ VE WebAssembly X86 XCore )
 ALL_LLVM_TARGETS=( "${ALL_LLVM_TARGETS[@]/#/llvm_targets_}" )
 LLVM_TARGET_USEDEPS=${ALL_LLVM_TARGETS[@]/%/(-)?}
 
 LICENSE="|| ( MIT Apache-2.0 ) BSD BSD-1 BSD-2 BSD-4 UoI-NCSA"
 
-IUSE="big-endian clippy cpu_flags_x86_sse2 debug dist doc llvm-libunwind miri nightly parallel-compiler profiler rls rustfmt rust-analyzer rust-src system-bootstrap system-llvm test wasm ${ALL_LLVM_TARGETS[*]}"
+IUSE="big-endian clippy cpu_flags_x86_sse2 debug dist doc llvm-libunwind +lto miri nightly parallel-compiler profiler rustfmt rust-analyzer rust-src system-bootstrap system-llvm test wasm ${ALL_LLVM_TARGETS[*]}"
 
 # Please keep the LLVM dependency block separate. Since LLVM is slotted,
 # we need to *really* make sure we're not pulling more than one slot
@@ -49,7 +51,7 @@ IUSE="big-endian clippy cpu_flags_x86_sse2 debug dist doc llvm-libunwind miri ni
 
 # How to use it:
 # List all the working slots in LLVM_VALID_SLOTS, newest first.
-LLVM_VALID_SLOTS=( 16 15 )
+LLVM_VALID_SLOTS=( 17 )
 LLVM_MAX_SLOT="${LLVM_VALID_SLOTS[0]}"
 
 # splitting usedeps needed to avoid CI/pkgcheck's UncheckableDep limitation
@@ -121,13 +123,10 @@ RDEPEND="${DEPEND}
 	sys-apps/lsb-release
 "
 
-# FIXME: https://bugs.gentoo.org/874885
-# rust-analyzer should work with wasm, but currently does not
 REQUIRED_USE="|| ( ${ALL_LLVM_TARGETS[*]} )
 	miri? ( nightly )
 	parallel-compiler? ( nightly )
-	rls? ( rust-src )
-	rust-analyzer? ( !wasm )
+	rust-analyzer? ( rust-src )
 	test? ( ${ALL_LLVM_TARGETS[*]} )
 	wasm? ( llvm_targets_WebAssembly )
 	x86? ( cpu_flags_x86_sse2 )
@@ -165,12 +164,19 @@ RESTRICT="test"
 VERIFY_SIG_OPENPGP_KEY_PATH=${BROOT}/usr/share/openpgp-keys/rust.asc
 
 PATCHES=(
-	"${FILESDIR}"/1.68.0-ignore-broken-and-non-applicable-tests.patch
+	"${FILESDIR}"/1.72.0-bump-libc-deps-to-0.2.146.patch
+	"${FILESDIR}"/1.70.0-ignore-broken-and-non-applicable-tests.patch
 	"${FILESDIR}"/1.62.1-musl-dynamic-linking.patch
 	"${FILESDIR}"/1.67.0-doc-wasm.patch
+	"${FILESDIR}"/1.72.0-fix-llvm-17-1.patch
+	"${FILESDIR}"/1.72.0-fix-llvm-17-2.patch
 )
 
 S="${WORKDIR}/${MY_P}-src"
+
+clear_vendor_checksums() {
+	sed -i 's/\("files":{\)[^}]*/\1/' "vendor/${1}/.cargo-checksum.json" || die
+}
 
 toml_usex() {
 	usex "${1}" true false
@@ -208,7 +214,6 @@ pre_build_checks() {
 	fi
 	M=$(( $(usex clippy 128 0) + ${M} ))
 	M=$(( $(usex miri 128 0) + ${M} ))
-	M=$(( $(usex rls 512 0) + ${M} ))
 	M=$(( $(usex rustfmt 256 0) + ${M} ))
 	# add 2G if we compile llvm and 256M per llvm_target
 	if ! use system-llvm; then
@@ -286,6 +291,12 @@ esetup_unwind_hack() {
 }
 
 src_prepare() {
+	# Clear vendor checksums for crates that we patched to bump libc.
+	for i in addr2line-0.20.0 bstr cranelift-jit crossbeam-channel elasticlunr-rs handlebars icu_locid libffi \
+		terminal_size tracing-tree; do
+		clear_vendor_checksums "${i}"
+	done
+
 	if ! use system-bootstrap; then
 		has_version sys-devel/gcc || esetup_unwind_hack
 		local rust_stage0_root="${WORKDIR}"/rust-stage0
@@ -299,7 +310,7 @@ src_prepare() {
 }
 
 src_configure() {
-	filter-flags '-flto*' # https://bugs.gentoo.org/862109 https://bugs.gentoo.org/866231
+	filter-lto # https://bugs.gentoo.org/862109 https://bugs.gentoo.org/866231
 
 	local rust_target="" rust_targets="" arch_cflags
 
@@ -317,11 +328,11 @@ src_configure() {
 	fi
 	rust_targets="${rust_targets#,}"
 
-	local tools='"cargo"'
+	# cargo and rustdoc are mandatory and should always be included
+	local tools='"cargo","rustdoc"'
 	use clippy && tools+=',"clippy"'
 	use miri && tools+=',"miri"'
 	use profiler && tools+=',"rust-demangler"'
-	use rls && tools+=',"rls","analysis"'
 	use rustfmt && tools+=',"rustfmt"'
 	use rust-analyzer && tools+=',"rust-analyzer"'
 	use rust-src && tools+=',"src"'
@@ -366,6 +377,7 @@ src_configure() {
 			*)
 				;;
 		esac)
+		enable-warnings = false
 		[llvm.build-config]
 		CMAKE_VERBOSE_MAKEFILE = "ON"
 		CMAKE_C_FLAGS_${cm_btype} = "${CFLAGS}"
@@ -433,9 +445,11 @@ src_configure() {
 		deny-warnings = $(usex wasm $(usex doc false true) true)
 		backtrace-on-ice = true
 		jemalloc = false
+		lto = "$(usex lto fat off)"
 		[dist]
 		src-tarball = false
 		compression-formats = ["xz"]
+		compression-profile = "balanced"
 	_EOF_
 
 	for v in $(multilib_get_enabled_abi_pairs); do
@@ -614,12 +628,8 @@ src_test() {
 	for i in "${tests[@]}"; do
 		local t="src/test/${i}"
 		einfo "rust_src_test: running ${t}"
-		if ! (
-				IFS=$'\n'
-				env $(cat "${S}"/config.env) RUST_BACKTRACE=1 \
-				"${EPYTHON}" ./x.py test -vv --config="${S}"/config.toml \
+		if ! RUST_BACKTRACE=1 "${EPYTHON}" ./x.py test -vv --config="${S}"/config.toml \
 				-j$(makeopts_jobs) --no-doc --no-fail-fast "${t}"
-			)
 		then
 				failed+=( "${t}" )
 				eerror "rust_src_test: ${t} failed"
@@ -633,11 +643,7 @@ src_test() {
 }
 
 src_install() {
-	(
-	IFS=$'\n'
-	env $(cat "${S}"/config.env) DESTDIR="${D}" \
-		"${EPYTHON}" ./x.py install	-vv --config="${S}"/config.toml -j$(makeopts_jobs) || die
-	)
+	DESTDIR="${D}" "${EPYTHON}" ./x.py install -vv --config="${S}"/config.toml -j$(makeopts_jobs) || die
 
 	# bug #689562, #689160
 	rm -v "${ED}/usr/lib/${PN}/${PV}/etc/bash_completion.d/cargo" || die
@@ -656,7 +662,6 @@ src_install() {
 	use clippy && symlinks+=( clippy-driver cargo-clippy )
 	use miri && symlinks+=( miri cargo-miri )
 	use profiler && symlinks+=( rust-demangler )
-	use rls && symlinks+=( rls )
 	use rustfmt && symlinks+=( rustfmt cargo-fmt )
 	use rust-analyzer && symlinks+=( rust-analyzer )
 
@@ -690,6 +695,7 @@ src_install() {
 	_EOF_
 
 	rm -rf "${ED}/usr/lib/${PN}/${PV}"/*.old || die
+	rm -rf "${ED}/usr/lib/${PN}/${PV}/bin"/*.old || die
 	rm -rf "${ED}/usr/lib/${PN}/${PV}/doc"/*.old || die
 
 	# note: eselect-rust adds EROOT to all paths below
@@ -716,9 +722,6 @@ src_install() {
 	fi
 	if use profiler; then
 		echo /usr/bin/rust-demangler >> "${T}/provider-${P}"
-	fi
-	if use rls; then
-		echo /usr/bin/rls >> "${T}/provider-${P}"
 	fi
 	if use rustfmt; then
 		echo /usr/bin/rustfmt >> "${T}/provider-${P}"
