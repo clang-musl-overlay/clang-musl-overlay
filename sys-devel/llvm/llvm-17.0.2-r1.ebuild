@@ -4,6 +4,7 @@
 EAPI=8
 
 PYTHON_COMPAT=( python3_{10..12} )
+
 inherit cmake llvm.org multilib-minimal pax-utils python-any-r1
 inherit toolchain-funcs
 
@@ -18,7 +19,7 @@ HOMEPAGE="https://llvm.org/"
 
 LICENSE="Apache-2.0-with-LLVM-exceptions UoI-NCSA BSD public-domain rc"
 SLOT="${LLVM_MAJOR}/${LLVM_SOABI}"
-KEYWORDS=""
+KEYWORDS="~amd64 ~x86" 
 IUSE="
 	+binutils-plugin debug debuginfod doc exegesis libedit +libffi
 	ncurses polly test xar xml z3 zstd
@@ -74,6 +75,7 @@ PDEPEND="
 
 LLVM_COMPONENTS=( llvm cmake third-party )
 LLVM_MANPAGES=1
+LLVM_PATCHSET=${PV}
 LLVM_USE_TARGETS=provide
 llvm.org_set_globals
 
@@ -373,6 +375,8 @@ multilib_src_configure() {
 		-DLLVM_ENABLE_LIBXML2=$(usex xml)
 		-DLLVM_ENABLE_ASSERTIONS=$(usex debug)
 		-DLLVM_ENABLE_LIBPFM=$(usex exegesis)
+		-DLLVM_ENABLE_EH=ON
+		-DLLVM_ENABLE_RTTI=ON
 		-DLLVM_ENABLE_Z3_SOLVER=$(usex z3)
 		-DLLVM_ENABLE_ZSTD=$(usex zstd)
 		-DLLVM_ENABLE_CURL=$(usex debuginfod)
@@ -441,8 +445,8 @@ multilib_src_configure() {
 		local tblgen="${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/bin/llvm-tblgen"
 		[[ -x "${tblgen}" ]] \
 			|| die "${tblgen} not found or usable"
-		mycmakeargs+=(
-			-DCMAKE_CROSSCOMPILING=ON
+		 mycmakeargs+=(
+		 	-DCMAKE_CROSSCOMPILING=ON
 			-DLLVM_TABLEGEN="${tblgen}"
 		)
 	fi
@@ -461,11 +465,11 @@ multilib_src_configure() {
 	# exhausting the limit on 32-bit linker executable
 	use x86 && local -x LDFLAGS="${LDFLAGS} -Wl,--no-keep-memory"
 
-    # Link polly against LLVM, #715612
-    if use polly; then
-        local -x LDFLAGS="${LDFLAGS} \
-            -L\"${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/lib\" -lPolly -lPollyISL"
-    fi
+	# Link polly against LLVM, #715612
+	if use polly; then
+		local -x LDFLAGS="${LDFLAGS} \
+			-L\"${EPREFIX}/usr/lib/llvm/${LLVM_MAJOR}/lib\" -lPolly -lPollyISL"
+	fi
 
 	# LLVM_ENABLE_ASSERTIONS=NO does not guarantee this for us, #614844
 	use debug || local -x CPPFLAGS="${CPPFLAGS} -DNDEBUG"
