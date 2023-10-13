@@ -48,6 +48,8 @@ src_prepare() {
 	eautoreconf
 
 	elibtoolize # to prevent -L/usr/lib ending up in the linker line wrt 499510
+
+	append-ldflags -Wl,--undefined-version
 }
 
 multilib_src_configure() {
@@ -57,7 +59,6 @@ multilib_src_configure() {
 	else
 		util_switch="--with"
 	fi
-	append-ldflags -Wl,--undefined-version
 
 	local myeconfargs=(
 		--disable-maintainer-mode

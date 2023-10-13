@@ -299,9 +299,9 @@ pkg_setup() {
 
 src_prepare() {
 	default
+	append-ldflags -Wl,--undefined-version
 	sed -i -e "/^PLATFORM_SYMBOLS/a '__gentoo_check_ldflags__'," \
 		bin/symbols-check.py || die # bug #830728
-	append-ldflags -Wl,--undefined-version
 }
 
 multilib_src_configure() {
