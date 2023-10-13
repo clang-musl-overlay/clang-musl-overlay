@@ -1,0 +1,10 @@
+--- a/Makefile
++++ b/Makefile
+@@ -70,7 +70,6 @@
+ endif
+ endif #CFLAGS
+ 
+-CFLAGS += -flto-partition=none
+ 
+ EXTRA_CXXFLAGS = ${CFLAGS} ${CPPFLAGS} ${CXX_WARNINGS} -std=gnu++0x
+ EXTRA_CFLAGS = ${EXTRA_CXXFLAGS} ${CPP_WARNINGS}

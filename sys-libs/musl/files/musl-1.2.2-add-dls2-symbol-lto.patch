@@ -1,0 +1,11 @@
+--- a/ldso/dlstart.c
++++ b/ldso/dlstart.c
+@@ -18,6 +18,8 @@
+ 	*(fp) = static_func_ptr; } while(0)
+ #endif
+ 
++__asm__(".globl __dls2\n");
++
+ hidden void _dlstart_c(size_t *sp, size_t *dynv)
+ {
+ 	size_t i, aux[AUX_CNT], dyn[DYN_CNT];

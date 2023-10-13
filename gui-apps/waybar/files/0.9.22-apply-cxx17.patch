@@ -1,0 +1,56 @@
+diff --git a/meson.build b/meson.build
+index e71807ec..7aa7dded 100644
+--- a/meson.build
++++ b/meson.build
+@@ -4,7 +4,7 @@ project(
+     license: 'MIT',
+     meson_version: '>= 0.50.0',
+     default_options : [
+-        'cpp_std=c++20',
++        'cpp_std=c++17',
+         'buildtype=release',
+         'default_library=static'
+     ],
+diff --git a/src/modules/hyprland/workspaces.cpp b/src/modules/hyprland/workspaces.cpp
+index 16894842..af823565 100644
+--- a/src/modules/hyprland/workspaces.cpp
++++ b/src/modules/hyprland/workspaces.cpp
+@@ -100,7 +100,7 @@ void Workspaces::onEvent(const std::string &ev) {
+     for (Json::Value workspace_json : workspaces_json) {
+       if (workspace_json["name"].asString() == payload &&
+           (all_outputs() || bar_.output->name == workspace_json["monitor"].asString()) &&
+-          (show_special() || !workspace_json["name"].asString().starts_with("special"))) {
++          (show_special() || !(workspace_json["name"].asString().rfind("special",0) == 0))) {
+         workspaces_to_create_.push_back(workspace_json);
+         break;
+       }
+@@ -155,7 +155,7 @@ void Workspaces::create_workspace(Json::Value &value) {
+       workspaces_.begin(), workspaces_.end(), [&](std::unique_ptr<Workspace> const &x) {
+         auto name = value["name"].asString();
+         return x->is_persistent() &&
+-               ((name.starts_with("special:") && name.substr(8) == x->name()) || name == x->name());
++               ((name.rfind("special:", 0) == 0 && name.substr(8) == x->name()) || name == x->name());
+       });
+   if (workspace != workspaces_.end()) {
+     // replace workspace, but keep persistent flag
+@@ -266,7 +266,7 @@ void Workspaces::init() {
+   const Json::Value workspaces_json = gIPC->getSocket1JsonReply("workspaces");
+   for (Json::Value workspace_json : workspaces_json) {
+     if ((all_outputs() || bar_.output->name == workspace_json["monitor"].asString()) &&
+-        (!workspace_json["name"].asString().starts_with("special") || show_special()))
++        (!(workspace_json["name"].asString().rfind("special",0) == 0) || show_special()))
+       create_workspace(workspace_json);
+   }
+ 
+@@ -289,9 +289,9 @@ Workspace::Workspace(const Json::Value &workspace_data)
+       output_(workspace_data["monitor"].asString()),  // TODO:allow using monitor desc
+       windows_(workspace_data["windows"].asInt()),
+       active_(true) {
+-  if (name_.starts_with("name:")) {
++  if (name_.rfind("name:", 0) == 0) {
+     name_ = name_.substr(5);
+-  } else if (name_.starts_with("special")) {
++  } else if (name_.rfind("special", 0) == 0) {
+     name_ = id_ == -99 ? name_ : name_.substr(8);
+     is_special_ = true;
+   }

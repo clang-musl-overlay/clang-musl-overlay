@@ -1,0 +1,27 @@
+--- a/src/shims/getprogname.h
++++ b/src/shims/getprogname.h
+@@ -26,9 +26,13 @@
+ 
+ #if !HAVE_GETPROGNAME
+ 
+-#ifdef __ANDROID__
++#if !HAVE_DECL_PROGRAM_INVOCATION_SHORT_NAME
++# if defined(__ANDROID__)
+ extern const char *__progname;
+-#endif /* __ANDROID */
++# elif defined(__linux__)
++extern char *__progname;
++# endif
++#endif /* !HAVE_DECL_PROGRAM_INVOCATION_SHORT_NAME */
+ 
+ #if defined(_WIN32)
+ const char *getprogname(void);
+@@ -39,7 +41,7 @@
+ {
+ # if HAVE_DECL_PROGRAM_INVOCATION_SHORT_NAME
+ 	return program_invocation_short_name;
+-# elif defined(__ANDROID__)
++# elif defined(__ANDROID__) || defined(__linux__)
+ 	return __progname;
+ # else
+ #   error getprogname(3) is not available on this platform

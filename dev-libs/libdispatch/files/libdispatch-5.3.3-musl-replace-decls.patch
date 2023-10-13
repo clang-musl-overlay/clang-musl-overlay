@@ -1,0 +1,670 @@
+--- a/dispatch/block.h
++++ b/dispatch/block.h
+@@ -34,7 +34,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @typedef dispatch_block_flags_t
+@@ -419,7 +421,9 @@
+ intptr_t
+ dispatch_block_testcancel(dispatch_block_t block);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/data.h
++++ b/dispatch/data.h
+@@ -28,7 +28,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*! @header
+  * Dispatch data objects describe contiguous or sparse regions of memory that
+@@ -271,7 +273,9 @@
+ 	size_t location,
+ 	size_t *offset_ptr);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/group.h
++++ b/dispatch/group.h
+@@ -35,7 +35,9 @@
+  */
+ DISPATCH_DECL(dispatch_group);
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_group_create
+@@ -272,7 +274,9 @@
+ void
+ dispatch_group_leave(dispatch_group_t group);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/introspection.h
++++ b/dispatch/introspection.h
+@@ -37,7 +37,9 @@
+  * DYLD_LIBRARY_PATH=/usr/lib/system/introspection
+  */
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_introspection_hook_queue_create
+@@ -181,7 +183,9 @@
+ dispatch_introspection_hook_queue_callout_end(dispatch_queue_t queue,
+ 		void *_Nullable context, dispatch_function_t function);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/io.h
++++ b/dispatch/io.h
+@@ -28,7 +28,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*! @header
+  * Dispatch I/O provides both stream and random access asynchronous read and
+@@ -590,7 +592,9 @@
+ 	uint64_t interval,
+ 	dispatch_io_interval_flags_t flags);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/once.h
++++ b/dispatch/once.h
+@@ -28,7 +28,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @typedef dispatch_once_t
+@@ -118,7 +120,9 @@
+ #define dispatch_once_f _dispatch_once_f
+ #endif // DISPATCH_ONCE_INLINE_FASTPATH
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/semaphore.h
++++ b/dispatch/semaphore.h
+@@ -36,7 +36,9 @@
+  */
+ DISPATCH_DECL(dispatch_semaphore);
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_semaphore_create
+@@ -110,7 +112,9 @@
+ intptr_t
+ dispatch_semaphore_signal(dispatch_semaphore_t dsema);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/source.h
++++ b/dispatch/source.h
+@@ -56,7 +56,9 @@
+  */
+ DISPATCH_SOURCE_DECL(dispatch_source);
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @typedef dispatch_source_type_t
+@@ -766,7 +768,9 @@
+ dispatch_source_set_registration_handler_f(dispatch_source_t source,
+ 	dispatch_function_t _Nullable handler);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/os/generic_win_base.h
++++ b/os/generic_win_base.h
+@@ -25,14 +25,6 @@
+ typedef int mode_t;
+ typedef void pthread_attr_t;
+ 
+-#if defined(__cplusplus)
+-#define __BEGIN_DECLS extern "C" {
+-#define __END_DECLS }
+-#else
+-#define __BEGIN_DECLS
+-#define __END_DECLS
+-#endif
+-
+ #ifndef API_AVAILABLE
+ #define API_AVAILABLE(...)
+ #endif
+--- a/os/object_private.h
++++ b/os/object_private.h
+@@ -133,7 +133,9 @@
+ 
+ OS_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #if !_OS_OBJECT_OBJC_ARC
+ 
+@@ -198,7 +200,9 @@
+ 
+ #endif // !_OS_OBJECT_OBJC_ARC
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ OS_ASSUME_NONNULL_END
+ 
+--- a/os/voucher_activity_private.h
++++ b/os/voucher_activity_private.h
+@@ -42,7 +42,9 @@
+ #define OS_VOUCHER_EXPORT OS_EXPORT
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @const VOUCHER_CURRENT
+@@ -366,7 +368,9 @@
+ firehose_activity_id_t
+ voucher_get_activity_id_4dyld(void);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // OS_VOUCHER_ACTIVITY_SPI
+ 
+--- a/os/voucher_private.h
++++ b/os/voucher_private.h
+@@ -50,7 +50,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @group Voucher Transport SPI
+@@ -630,7 +632,9 @@
+ 
+ #endif // __has_include(<mach/mach.h>)
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/private/benchmark.h
++++ b/private/benchmark.h
+@@ -34,7 +34,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_benchmark
+@@ -82,7 +84,9 @@
+ dispatch_benchmark_f(size_t count, void *_Nullable ctxt,
+ 		dispatch_function_t func);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/private/data_private.h
++++ b/private/data_private.h
+@@ -34,7 +34,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @const DISPATCH_DATA_DESTRUCTOR_NONE
+@@ -318,7 +320,9 @@
+ const void *_Nullable
+ dispatch_data_get_flattened_bytes_4libxpc(dispatch_data_t data);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/private/introspection_private.h
++++ b/private/introspection_private.h
+@@ -43,17 +43,9 @@
+  * context while the rest of the process is suspended.
+  */
+ 
+-#ifndef __BEGIN_DECLS
+-#if defined(__cplusplus)
+-#define	__BEGIN_DECLS extern "C" {
+-#define	__END_DECLS }
+-#else
+-#define	__BEGIN_DECLS
+-#define	__END_DECLS
+-#endif
+-#endif
+-
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #ifndef __DISPATCH_INDIRECT__
+ /*
+@@ -866,6 +858,8 @@
+ dispatch_introspection_hook_callout_queue_item_complete(
+ 		dispatch_continuation_t object);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+--- a/private/io_private.h
++++ b/private/io_private.h
+@@ -34,7 +34,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_read_f
+@@ -409,7 +411,9 @@
+ 	void *_Nullable context,
+ 	dispatch_function_t barrier);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/private/layout_private.h
++++ b/private/layout_private.h
+@@ -26,7 +26,9 @@
+ #include <dispatch/base.h> // for HeaderDoc
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ API_AVAILABLE(macos(10.6), ios(4.0))
+ DISPATCH_EXPORT const struct dispatch_queue_offsets_s {
+@@ -96,6 +98,8 @@
+ #endif // TARGET_OS_MAC
+ #endif // DISPATCH_LAYOUT_SPI
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif // __DISPATCH_LAYOUT_PRIVATE__
+--- a/private/mach_private.h
++++ b/private/mach_private.h
+@@ -32,7 +32,9 @@
+ #include <dispatch/base.h> // for HeaderDoc
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ #if DISPATCH_MACH_SPI
+ 
+@@ -1150,6 +1152,8 @@
+ 
+ #endif // DISPATCH_MACH_SPI
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+--- a/private/private.h
++++ b/private/private.h
+@@ -82,7 +82,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function _dispatch_is_multithreaded
+@@ -262,7 +264,9 @@
+ void
+ _dispatch_poll_for_events_4launchd(void);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/private/queue_private.h
++++ b/private/queue_private.h
+@@ -34,7 +34,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @enum dispatch_queue_flags_t
+@@ -496,7 +498,9 @@
+ void _dispatch_install_thread_detach_callback(void (*cb)(void));
+ #endif
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/private/source_private.h
++++ b/private/source_private.h
+@@ -34,7 +34,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @const DISPATCH_SOURCE_TYPE_INTERVAL
+@@ -123,7 +125,9 @@
+ API_AVAILABLE(macos(10.13), ios(11.0), tvos(11.0), watchos(4.0)) DISPATCH_LINUX_UNAVAILABLE()
+ DISPATCH_SOURCE_TYPE_DECL(nw_channel);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ /*!
+  * @enum dispatch_source_sock_flags_t
+@@ -436,7 +440,9 @@
+ #define DISPATCH_PROC_EXIT_STATUS_TERMSIG(status) ((int)WTERMSIG(status))
+ #define DISPATCH_PROC_EXIT_STATUS_CORE_DUMPED(status) ((bool)WCOREDUMP(status))
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_source_set_mandatory_cancel_handler
+@@ -642,7 +648,9 @@
+ dispatch_source_get_extended_data(dispatch_source_t source,
+ 		dispatch_source_extended_data_t data, size_t size);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/private/workloop_private.h
++++ b/private/workloop_private.h
+@@ -40,7 +40,9 @@
+ 
+ DISPATCH_ASSUME_NONNULL_BEGIN
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @typedef dispatch_workloop_t
+@@ -433,7 +435,9 @@
+ dispatch_barrier_async_and_wait_f(dispatch_queue_t queue,
+ 		void *_Nullable context, dispatch_function_t work);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/src/internal.h
++++ b/src/internal.h
+@@ -320,7 +320,9 @@
+ 
+ /* More #includes at EOF (dependent on the contents of internal.h) ... */
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /* SPI for Libsystem-internal use */
+ DISPATCH_EXPORT DISPATCH_NOTHROW void libdispatch_init(void);
+@@ -1113,6 +1115,8 @@
+ #include "inline_internal.h"
+ #include "firehose/firehose_internal.h"
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* __DISPATCH_INTERNAL__ */
+ 
+--- a/dispatch/object.h
++++ b/dispatch/object.h
+@@ -176,7 +176,9 @@
+ typedef void (^dispatch_block_t)(void);
+ #endif // __BLOCKS__
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_retain
+@@ -543,7 +545,9 @@
+ void
+ dispatch_debugv(dispatch_object_t object, const char *message, va_list ap);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/queue.h
++++ b/dispatch/queue.h
+@@ -198,7 +198,9 @@
+ DISPATCH_DECL_SUBCLASS(dispatch_queue_concurrent, dispatch_queue);
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function dispatch_async
+@@ -1538,7 +1540,9 @@
+ #define dispatch_assert_queue_not_debug(q) dispatch_assert_queue_not(q)
+ #endif
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/dispatch/time.h
++++ b/dispatch/time.h
+@@ -52,7 +52,9 @@
+ #define USEC_PER_SEC 1000000ull
+ #define NSEC_PER_USEC 1000ull
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct timespec;
+ 
+@@ -128,7 +130,9 @@
+ dispatch_time_t
+ dispatch_walltime(const struct timespec *_Nullable when, int64_t delta);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ DISPATCH_ASSUME_NONNULL_END
+ 
+--- a/os/object.h
++++ b/os/object.h
+@@ -218,7 +218,9 @@
+ 
+ #define OS_OBJECT_GLOBAL_OBJECT(type, object) ((OS_OBJECT_BRIDGE type)&(object))
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*!
+  * @function os_retain
+@@ -267,6 +269,8 @@
+ #define os_release(object) [object release]
+ #endif
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+ 
