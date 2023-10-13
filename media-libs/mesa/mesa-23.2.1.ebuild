@@ -5,7 +5,7 @@ EAPI=8
 
 PYTHON_COMPAT=( python3_{10..11} )
 
-inherit llvm meson-multilib python-any-r1 linux-info
+inherit llvm meson-multilib python-any-r1 linux-info flag-o-matic
 
 MY_P="${P/_/-}"
 
@@ -295,11 +295,11 @@ pkg_setup() {
 		llvm_pkg_setup
 	fi
 	python-any-r1_pkg_setup
+	append-ldflags -Wl,--undefined-version # clang-musl custom env
 }
 
 src_prepare() {
 	default
-	append-ldflags -Wl,--undefined-version
 	sed -i -e "/^PLATFORM_SYMBOLS/a '__gentoo_check_ldflags__'," \
 		bin/symbols-check.py || die # bug #830728
 }

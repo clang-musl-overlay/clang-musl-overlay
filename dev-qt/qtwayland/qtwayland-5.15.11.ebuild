@@ -8,7 +8,7 @@ if [[ ${PV} != *9999* ]]; then
 	KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
 fi
 
-inherit qt5-build
+inherit qt5-build flag-o-matic
 
 DESCRIPTION="Wayland platform plugin for Qt"
 
@@ -35,6 +35,11 @@ PATCHES=(
         "${FILESDIR}/qtwayland-5.15.11-libcxx-add-array.patch"
 )
 
+pkg_setup() {
+		default
+		append-ldflags -Wl,--undefined-version #clang-musl-overlay custom env
+}
+
 src_configure() {
 	local myqmakeargs=(
 		--
@@ -47,7 +52,6 @@ src_configure() {
 		$(qt_use compositor feature-wayland-vulkan-server-buffer)
 	)
 	qt5-build_src_configure
-	append-ldflags -Wl,--undefined-version
 }
 
 src_install() {
