@@ -39,8 +39,13 @@ MULTILIB_WRAPPED_HEADERS=(
 PATCHES=(
 	"${FILESDIR}/${PN}-2.1.0-format-security.patch"
 	"${FILESDIR}/${PN}-2.1.0-ncurses_pkgconfig.patch"
-	"${FILESDIR}/${P}-realpath-test-fix.patch"
+	"${FILESDIR}/${PN}-2.1.0-realpath-test-fix.patch"
 )
+
+src_unpack() {
+	default
+	append-ldflags -Wl,--undefined-version
+}
 
 src_prepare() {
 	default
