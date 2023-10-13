@@ -24,7 +24,7 @@ DEPEND="${RDEPEND}
 	test? ( =dev-qt/qtxml-${QT5_PV}* )
 "
 
-pkg_setup() {
+src_unpack() {
 		default
 		append-ldflags -Wl,--undefined-version #clang-musl-overlay custom env
 }

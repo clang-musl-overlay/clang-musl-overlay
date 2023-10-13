@@ -27,7 +27,7 @@ PATCHES=(
 	"${FILESDIR}/libbsd-0.11.7-musl-lfs.patch"
 )
 
-pkg_setup() {
+src_unpack() {
 		default
 		append-ldflags -Wl,--undefined-version #clang-musl-overlay custom env
 }

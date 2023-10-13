@@ -32,7 +32,7 @@ QT5_GENTOO_PRIVATE_CONFIG=(
 	:testlib
 )
 
-pkg_setup() {
+src_unpack() {
 		default
 		append-ldflags -Wl,--undefined-version #clang-musl-overlay custom env
 }

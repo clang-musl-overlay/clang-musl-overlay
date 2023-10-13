@@ -131,7 +131,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.15.11-xkbcommon160.patch
 )
 
-pkg_setup() {
+src_unpack() {
 		default
 		append-ldflags -Wl,--undefined-version #clang-musl-overlay custom env
 }
