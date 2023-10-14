@@ -80,6 +80,8 @@ src_prepare() {
 	eapply "${FILESDIR}"/sb-posix-test-2.2.9.patch
 	# bug #767742
 	eapply "${FILESDIR}"/etags-2.1.0.patch
+	# Use ${PV} as build-id, bug #797574
+	eapply "${FILESDIR}"/build-id-2.3.6.patch
 
 	eapply "${FILESDIR}"/verbose-build-2.0.3.patch
 
@@ -143,7 +145,7 @@ src_compile() {
 	env - HOME="${T}" PATH="${PATH}" \
 		CC="$(tc-getCC)" AS="$(tc-getAS)" LD="$(tc-getLD)" \
 		CPPFLAGS="${CPPFLAGS}" CFLAGS="${CFLAGS}" ASFLAGS="${ASFLAGS}" LDFLAGS="${LDFLAGS}" \
-		GNUMAKE=make ./make.sh \
+		GNUMAKE=make PV=${PV} ./make.sh \
 		"${SBCL_EXE} --no-sysinit --no-userinit --disable-debugger" \
 		|| die "make failed"
 
