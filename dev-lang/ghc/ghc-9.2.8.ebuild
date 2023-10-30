@@ -13,7 +13,7 @@ if [[ ${CTARGET} = ${CHOST} ]] ; then
 	fi
 fi
 
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=( python3_{9..12} )
 inherit python-any-r1
 inherit autotools bash-completion-r1 flag-o-matic ghc-package
 inherit multiprocessing pax-utils toolchain-funcs prefix
@@ -81,7 +81,7 @@ IUSE="big-endian +doc elfutils ghcbootstrap ghcmakebinary +gmp +llvm numa profil
 IUSE+=" binary"
 RESTRICT="!test? ( test )"
 
-LLVM_MAX_SLOT="16"
+LLVM_MAX_SLOT="17"
 RDEPEND="
 	>=dev-lang/perl-5.6.1
 	dev-libs/gmp:0=
