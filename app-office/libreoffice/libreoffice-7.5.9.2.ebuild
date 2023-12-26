@@ -3,7 +3,7 @@
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{10..11} )
+PYTHON_COMPAT=( python3_{10..12} )
 PYTHON_REQ_USE="threads(+),xml(+)"
 
 MY_PV="${PV/_alpha/.alpha}"
@@ -126,7 +126,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	>=app-text/libwps-0.4
 	app-text/mythes
 	>=dev-cpp/clucene-2.3.3.4-r2
-	>=dev-cpp/libcmis-0.5.2-r2
+	>=dev-cpp/libcmis-0.6.2:0=
 	dev-db/unixODBC
 	dev-lang/perl
 	dev-libs/boost:=[nls]
@@ -272,6 +272,9 @@ BDEPEND="
 			(	sys-devel/clang:15
 				sys-devel/llvm:15
 				=sys-devel/lld-15*	)
+			(	sys-devel/clang:14
+				sys-devel/llvm:14
+				=sys-devel/lld-14*	)
 		)
 	)
 	odk? ( >=app-doc/doxygen-1.8.4 )
@@ -292,8 +295,15 @@ PATCHES=(
 	"${FILESDIR}/${PN}-6.1-nomancompress.patch"
 	"${FILESDIR}/${PN}-7.2.0.4-qt5detect.patch"
 
+	# maybe upstreamable
+	"${FILESDIR}/libreoffice-7.5.8.2-icu-74-compatibility.patch"
+
+	# 7.6 branch
+	"${WORKDIR}/${PN}-7.5.2.2-loong-buildsys-fix.patch" # bug 881389
+
 	# git master
-	"${WORKDIR}/${PN}-7.5.2.2-loong-buildsys-fix.patch"
+	"${FILESDIR}/${PN}-7.5.6.2-gcc-14.patch" # bug 916621
+	"${FILESDIR}/${P}-libxml2-2.12.patch" # bug 917691
 )
 
 S="${WORKDIR}/${PN}-${MY_PV}"
@@ -318,6 +328,7 @@ pkg_pretend() {
 }
 
 pkg_setup() {
+	append-ldflags -Wl,--undefined-version # clang-musl custom env
 	java-pkg-opt-2_pkg_setup
 	python-single-r1_pkg_setup
 	xdg_environment_reset
@@ -341,7 +352,6 @@ src_unpack() {
 		git-r3_fetch "${base_uri}/${PN}/help" "refs/heads/master"
 		git-r3_checkout "${base_uri}/${PN}/help" "helpcontent2" # doesn't match on help
 	fi
-	append-ldflags -Wl,--undefined-version
 }
 
 src_prepare() {
@@ -404,6 +414,12 @@ src_configure() {
 		NM=llvm-nm
 		RANLIB=llvm-ranlib
 		LDFLAGS+=" -fuse-ld=lld"
+
+		# Workaround for bug #907905
+		filter-lto
+
+		# Workaround for bug #915067
+		append-ldflags -Wl,--undefined-version
 
 		# Not implemented by Clang, bug #903889
 		filter-flags -Wlto-type-mismatch -Werror=lto-type-mismatch
