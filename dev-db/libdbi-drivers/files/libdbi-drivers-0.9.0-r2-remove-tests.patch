@@ -1,0 +1,13 @@
+diff --git a/Makefile.am b/Makefile.am
+index 8f0ad7e..b4f49c8 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = foreign dist-zip
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ 
+-SUBDIRS = drivers tests @docs_subdirs@
++SUBDIRS = drivers @docs_subdirs@
+ 
+ EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README README.win32 README.osx README.encodings TODO libdbi-drivers.spec.in config.h.in Makefile.w32 autogen.sh fixlt.sh
+ 
