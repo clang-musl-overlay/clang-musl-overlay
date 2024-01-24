@@ -12,13 +12,13 @@ HOMEPAGE="https://github.com/sumneko/${PN}"
 if [[ "${PV}" = 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="${HOMEPAGE}.git"
-	BDEPEND="dev-util/ninja"
+	BDEPEND="dev-build/ninja"
 else
 	SRC_URI="${HOMEPAGE}/releases/download/${PV}/${P}-submodules.zip"
 	KEYWORDS="amd64 x86"
 	BDEPEND="
 		app-arch/unzip
-		dev-util/ninja
+		dev-build/ninja
 	"
 fi
 

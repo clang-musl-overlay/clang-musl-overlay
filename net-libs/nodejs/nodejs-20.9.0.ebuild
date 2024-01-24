@@ -42,7 +42,7 @@ RDEPEND=">=app-arch/brotli-1.0.9:=
 	system-icu? ( >=dev-libs/icu-67:= )
 	system-ssl? ( >=dev-libs/openssl-1.1.1:0= )"
 BDEPEND="${PYTHON_DEPS}
-	dev-util/ninja
+	dev-build/ninja
 	sys-apps/coreutils
 	virtual/pkgconfig
 	test? ( net-misc/curl )
