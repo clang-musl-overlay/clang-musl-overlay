@@ -18,7 +18,7 @@ RESTRICT="!test? ( test )"
 PDEPEND="sys-devel/llvm:${SLOT}="
 BDEPEND="
 	${PYTHON_DEPS}
-	>=dev-util/cmake-3.16
+	>=dev-build/cmake-3.16
 	test? ( >=dev-python/lit-9.0.1 )
 "
 
