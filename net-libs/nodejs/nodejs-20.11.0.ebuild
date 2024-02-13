@@ -1,4 +1,4 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -20,13 +20,12 @@ if [[ ${PV} == *9999 ]]; then
 else
 	SRC_URI="https://nodejs.org/dist/v${PV}/node-v${PV}.tar.xz"
 	SLOT="0/$(ver_cut 1)"
-	KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~x86 ~amd64-linux ~x64-macos"
+	KEYWORDS="amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv x86 ~amd64-linux ~x64-macos"
 	S="${WORKDIR}/node-v${PV}"
 fi
 
 IUSE="corepack cpu_flags_x86_sse2 debug doc +icu inspector lto +npm pax-kernel +snapshot +ssl +system-icu +system-ssl test"
-REQUIRED_USE="corepack? ( !npm )
-	inspector? ( icu ssl )
+REQUIRED_USE="inspector? ( icu ssl )
 	npm? ( ssl )
 	system-icu? ( icu )
 	system-ssl? ( ssl )
@@ -35,12 +34,12 @@ REQUIRED_USE="corepack? ( !npm )
 RESTRICT="!test? ( test )"
 
 RDEPEND=">=app-arch/brotli-1.0.9:=
-	>=dev-libs/libuv-1.44.0:=
+	>=dev-libs/libuv-1.46.0:=
 	>=net-dns/c-ares-1.18.1:=
 	>=net-libs/nghttp2-1.41.0:=
 	sys-libs/zlib
 	corepack? ( !sys-apps/yarn )
-	system-icu? ( >=dev-libs/icu-67:= )
+	system-icu? ( >=dev-libs/icu-71:= )
 	system-ssl? ( >=dev-libs/openssl-1.1.1:0= )"
 BDEPEND="${PYTHON_DEPS}
 	dev-build/ninja
@@ -92,6 +91,11 @@ src_prepare() {
 	# less verbose install output (stating the same as portage, basically)
 	sed -i -e "/print/d" tools/install.py || die
 
+	# proper libdir, hat tip @ryanpcmcquen https://github.com/iojs/io.js/issues/504
+	local LIBDIR=$(get_libdir)
+	sed -i -e "s|lib/|${LIBDIR}/|g" tools/install.py || die
+	sed -i -e "s/'lib'/'${LIBDIR}'/" deps/npm/lib/npm.js || die
+
 	# Avoid writing a depfile, not useful
 	sed -i -e "/DEPFLAGS =/d" tools/gyp/pylib/gyp/generator/make.py || die
 
@@ -104,7 +108,10 @@ src_prepare() {
 	fi
 
 	# We need to disable mprotect on two files when it builds Bug 694100.
-	use pax-kernel && PATCHES+=( "${FILESDIR}"/${P}-18.16.0-paxmarking.patch )
+	use pax-kernel && PATCHES+=( "${FILESDIR}"/${PN}-20.6.0-paxmarking.patch )
+
+	# bug 922725
+	use riscv && PATCHES+=( "${FILESDIR}"/${P}-riscv.patch )
 
 	default
 }
@@ -230,6 +237,7 @@ src_install() {
 
 src_test() {
 	local drop_tests=(
+	test/parallel/test-dns-resolveany-bad-ancount.js
 		test/parallel/test-fs-read-stream.js
 		test/parallel/test-dns-setserver-when-querying.js
 		test/parallel/test-fs-mkdir.js
@@ -248,7 +256,7 @@ src_test() {
 
 pkg_postinst() {
 	if use npm; then
-	    ewarn "remember to run: source /etc/profile if you plan to use nodejs"
+		ewarn "remember to run: source /etc/profile if you plan to use nodejs"
 		ewarn "	in your current shell"
 	fi
 }

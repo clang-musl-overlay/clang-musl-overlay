@@ -1,4 +1,4 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -20,7 +20,7 @@ CMAKE_DOCS_USEFLAG="+doc"
 # TODO ... but bootstrap sometimes(?) fails with ninja now. bug #834759.
 CMAKE_MAKEFILE_GENERATOR="emake"
 CMAKE_REMOVE_MODULES_LIST=( none )
-inherit bash-completion-r1 cmake elisp-common flag-o-matic multiprocessing \
+inherit bash-completion-r1 cmake flag-o-matic multiprocessing \
 	toolchain-funcs virtualx xdg-utils
 
 MY_P="${P/_/-}"
@@ -40,7 +40,7 @@ else
 	fi
 
 	if [[ ${PV} != *_rc* ]] ; then
-		VERIFY_SIG_OPENPGP_KEY_PATH="${BROOT}"/usr/share/openpgp-keys/bradking.asc
+		VERIFY_SIG_OPENPGP_KEY_PATH=/usr/share/openpgp-keys/bradking.asc
 		inherit verify-sig
 
 		SRC_URI+=" verify-sig? (
@@ -60,7 +60,7 @@ S="${WORKDIR}/${MY_P}"
 
 LICENSE="BSD"
 SLOT="0"
-IUSE="${CMAKE_DOCS_USEFLAG} dap emacs gui ncurses qt6 test"
+IUSE="${CMAKE_DOCS_USEFLAG} dap gui ncurses qt6 test"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
@@ -73,7 +73,6 @@ RDEPEND="
 	sys-libs/zlib
 	virtual/pkgconfig
 	dap? ( dev-cpp/cppdap )
-	emacs? ( >=app-editors/emacs-23.1:* )
 	gui? (
 		!qt6? (
 			dev-qt/qtcore:5
@@ -106,9 +105,6 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-3.27.0_rc1-0006-Filter-out-distcc-warnings-to-avoid-confusing-CMake.patch
 
 	# Upstream fixes (can usually be removed with a version bump)
-	# pkgconf
-	# fixes https://github.com/pkgconf/pkgconf/issues/317
-	"${FILESDIR}"/${PN}-3.27.4-0001-FindPkgConfig-ignore-whitespace-separators-in-versio.patch
 )
 
 cmake_src_bootstrap() {
@@ -216,11 +212,6 @@ src_configure() {
 	cmake_src_configure
 }
 
-src_compile() {
-	cmake_src_compile
-	use emacs && elisp-compile Auxiliary/cmake-mode.el
-}
-
 src_test() {
 	# Fix OutDir and SelectLibraryConfigurations tests
 	# these are altered thanks to our eclass
@@ -259,11 +250,6 @@ src_install() {
 		doman "${WORKDIR}"/${PN}-${CMAKE_DOCS_VERSION}-docs/man*/*.[0-8]
 	fi
 
-	if use emacs; then
-		elisp-install ${PN} Auxiliary/cmake-mode.el Auxiliary/cmake-mode.elc
-		elisp-site-file-install "${FILESDIR}/${SITEFILE}"
-	fi
-
 	insinto /usr/share/vim/vimfiles/syntax
 	doins Auxiliary/vim/syntax/cmake.vim
 
@@ -277,8 +263,6 @@ src_install() {
 }
 
 pkg_postinst() {
-	use emacs && elisp-site-regen
-
 	if use gui; then
 		xdg_icon_cache_update
 		xdg_desktop_database_update
@@ -287,8 +271,6 @@ pkg_postinst() {
 }
 
 pkg_postrm() {
-	use emacs && elisp-site-regen
-
 	if use gui; then
 		xdg_icon_cache_update
 		xdg_desktop_database_update
