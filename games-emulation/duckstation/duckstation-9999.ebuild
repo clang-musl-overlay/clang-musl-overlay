@@ -50,13 +50,9 @@ PATCHES=(
         "${FILESDIR}/${PN}-fix-libsdl2-dep.patch"
 )
 
-src_unpack() {
-	default
-	append-cppflags -D_LARGEFILE64_SOURCE  #clang-musl-overlay custom env
-	append-cflags -D_LARGEFILE64_SOURCE  #clang-musl-overlay custom env
-}
-
 src_configure() {
+	append-cxxflags -D_LARGEFILE64_SOURCE  #clang-musl-overlay custom env
+	append-cflags -D_LARGEFILE64_SOURCE  #clang-musl-overlay custom env
 	local mycmakeargs=(
 		-DENABLE_CUBEB=ON
 		-DBUILD_NOGUI_FRONTEND=$(usex nogui)
