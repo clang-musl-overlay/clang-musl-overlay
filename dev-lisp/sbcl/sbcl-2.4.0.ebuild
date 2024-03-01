@@ -1,4 +1,4 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
@@ -7,7 +7,9 @@ inherit flag-o-matic pax-utils toolchain-funcs
 
 DESCRIPTION="Steel Bank Common Lisp (SBCL) is an implementation of ANSI Common Lisp"
 HOMEPAGE="https://www.sbcl.org/ http://sbcl.sourceforge.net/"
+BSD_SOCKETS_TEST_PATCH=bsd-sockets-test-2.3.6.patch
 SRC_URI="mirror://sourceforge/sbcl/${P}-source.tar.bz2
+	https://dev.gentoo.org/~grozin/${BSD_SOCKETS_TEST_PATCH}.gz
 	amd64? ( !system-bootstrap? ( https://github.com/roswell/sbcl_bin/releases/download/${PV}/${P}-x86-64-linux-musl-binary.tar.bz2 ) )
 "
 
@@ -19,7 +21,7 @@ IUSE="debug doc source system-bootstrap +threads +unicode +zstd"
 CDEPEND=">=dev-lisp/asdf-3.3:="
 # bug #843851
 BDEPEND="${CDEPEND}
-		dev-util/strace
+		dev-debug/strace
 		doc? ( sys-apps/texinfo >=media-gfx/graphviz-2.26.0 )"
 RDEPEND="${CDEPEND}
 		zstd? ( app-arch/zstd )"
@@ -75,7 +77,7 @@ src_prepare() {
 	# bug #468482
 	eapply "${FILESDIR}"/concurrency-test-2.0.1.patch
 	# bugs #486552, #527666, #517004
-	eapply "${FILESDIR}"/bsd-sockets-test-2.3.6.patch
+	eapply "${WORKDIR}"/bsd-sockets-test-2.3.6.patch
 	# bugs #560276, #561018
 	eapply "${FILESDIR}"/sb-posix-test-2.2.9.patch
 	# bug #767742
