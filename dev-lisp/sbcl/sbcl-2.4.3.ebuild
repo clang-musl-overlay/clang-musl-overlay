@@ -83,7 +83,7 @@ src_prepare() {
 	# bug #767742
 	eapply "${FILESDIR}"/etags-2.1.0.patch
 	# Use ${PV} as build-id, bug #797574
-	eapply "${FILESDIR}"/build-id-2.3.6.patch
+	eapply "${FILESDIR}"/build-id-2.4.3.patch
 
 	eapply "${FILESDIR}"/verbose-build-2.0.3.patch
 
