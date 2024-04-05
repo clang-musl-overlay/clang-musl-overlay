@@ -7,3 +7,6 @@ sys-devel/clang-runtime -sanitize
 # enable llvm-libunwind for libcxx
 sys-libs/libcxx libunwind
 sys-libs/libcxxabi libunwind
+
+# prefer a system-bootstrap for rust
+dev-lang/rust system-bootstrap

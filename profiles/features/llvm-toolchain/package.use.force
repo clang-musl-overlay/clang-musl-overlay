@@ -22,4 +22,4 @@ sys-devel/llvm -llvm_targets_XCore -llvm_targets_LoongArch
 sys-devel/llvm-conf binutils-wrappers clang-wrappers native-symlinks
 
 # rust can't be built with rust-bin after changing to llvm-libunwind
-dev-lang/rust system-bootstrap system-llvm
+dev-lang/rust system-llvm
