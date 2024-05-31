@@ -1,0 +1,15 @@
+# disable bfd/gold plugin
+sys-devel/llvm -binutils-plugin
+
+# use all defaults
+sys-libs/compiler-rt clang
+
+# disable sanitizers for now
+sys-devel/clang-runtime compiler-rt libcxx -sanitize
+
+# enable llvm-libunwind for libcxx
+sys-libs/libcxx libunwind libcxxabi
+sys-libs/libcxxabi libunwind
+
+# prefer a system-bootstrap for rust
+dev-lang/rust system-bootstrap

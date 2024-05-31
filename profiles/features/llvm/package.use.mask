@@ -1,0 +1,9 @@
+# unmask clang useflag for firefox on musl
+# See Bug #829033 for more info
+www-client/firefox -clang
+
+# unmask necessary use flags for dev-lang/rust
+dev-lang/rust -llvm-libunwind -system-llvm
+
+# libquadmath is gcc-specific
+dev-lang/perl quadmath

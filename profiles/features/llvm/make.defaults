@@ -1,0 +1,46 @@
+# Copyright 2022 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+# force portage to use clang as the primary compiler
+CC="clang"
+CXX="clang++"
+CPP="clang-cpp"
+AR="llvm-ar"
+AS="clang -c"
+NM="llvm-nm"
+STRIP="llvm-strip"
+RANLIB="llvm-ranlib"
+OBJCOPY="llvm-objcopy"
+STRINGS="llvm-strings"
+OBJDUMP="llvm-objdump"
+READELF="llvm-readelf"
+ADDR2LINE="llvm-addr2line"
+
+# needed for rust to use libcxx
+CXXSTDLIB="c++"
+
+# Rust needs this to build some crates (like uutils)
+# https://github.com/rust-lang/rust/blob/master/compiler/rustc_llvm/build.rs
+LLVM_USE_LIBCXX=1
+
+# curl needed by cmake
+BOOTSTRAP_USE="${BOOTSTRAP_USE} ssl curl_ssl_openssl"
+
+# clang needs this
+BOOTSTRAP_USE="${BOOTSTRAP_USE} python_single_target_python3_11"
+
+# llvm related useflags
+BOOTSTRAP_USE="${BOOTSTRAP_USE} clang compiler-rt default-compiler-rt"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} default-libcxx default-lld libcxx -sanitize libcxxabi"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} lld llvm-libunwind"
+
+# llvm & clang: explicitly disable all extra targets, otherwise linking stage2 fails
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_AArch64 -llvm_targets_AMDGPU"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_ARM -llvm_targets_AVR"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_BPF -llvm_targets_Hexagon"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_Lanai -llvm_targets_MSP430"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_Mips -llvm_targets_NVPTX"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_PowerPC -llvm_targets_RISCV"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_Sparc -llvm_targets_SystemZ"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_VE -llvm_targets_WebAssembly"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} -llvm_targets_XCore -llvm_targets_LoongArch"

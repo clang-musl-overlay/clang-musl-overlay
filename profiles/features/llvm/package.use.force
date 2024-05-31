@@ -1,0 +1,38 @@
+# disable LLVM_TARGETS
+sys-devel/clang -llvm_targets_AArch64 -llvm_targets_AMDGPU
+sys-devel/clang -llvm_targets_ARM -llvm_targets_AVR
+sys-devel/clang -llvm_targets_BPF -llvm_targets_Hexagon
+sys-devel/clang -llvm_targets_Lanai -llvm_targets_MSP430
+sys-devel/clang -llvm_targets_Mips -llvm_targets_NVPTX
+sys-devel/clang -llvm_targets_PowerPC -llvm_targets_RISCV
+sys-devel/clang -llvm_targets_Sparc -llvm_targets_SystemZ
+sys-devel/clang -llvm_targets_VE -llvm_targets_WebAssembly
+sys-devel/clang -llvm_targets_XCore -llvm_targets_LoongArch
+sys-devel/llvm -llvm_targets_AArch64 -llvm_targets_AMDGPU
+sys-devel/llvm -llvm_targets_ARM -llvm_targets_AVR
+sys-devel/llvm -llvm_targets_BPF -llvm_targets_Hexagon
+sys-devel/llvm -llvm_targets_Lanai -llvm_targets_MSP430
+sys-devel/llvm -llvm_targets_Mips -llvm_targets_NVPTX
+sys-devel/llvm -llvm_targets_PowerPC -llvm_targets_RISCV
+sys-devel/llvm -llvm_targets_Sparc -llvm_targets_SystemZ
+sys-devel/llvm -llvm_targets_VE -llvm_targets_WebAssembly
+sys-devel/llvm -llvm_targets_XCore -llvm_targets_LoongArch
+
+# llvm-conf utility to manage llvm/clang profiles
+sys-devel/llvm-conf binutils-wrappers clang-wrappers native-symlinks
+
+# rust can't be built with rust-bin after changing to llvm-libunwind
+dev-lang/rust system-llvm
+
+# Ionen Wolkens <ionen@gentoo.org> (2023-08-11)
+# clang without mingw is currently considered an unsupported
+# configuration (by Gentoo), and fails without extra steps.
+app-emulation/wine-staging mingw
+app-emulation/wine-vanilla mingw
+
+# Sam James <sam@gentoo.org> (2023-03-03)
+# Force the toolchain environment we expect on the LLVM profiles.
+# default-libcxx in particular changes ABI so can't be toggled at-will, and other
+# profile settings expect it.
+# TODO: Make a profile without default-libcxx too?
+sys-devel/clang-common default-compiler-rt default-lld default-libcxx
