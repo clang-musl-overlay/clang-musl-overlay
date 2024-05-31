@@ -4,10 +4,10 @@
 EAPI=8
 
 CONFIG_CHECK="~ADVISE_SYSCALLS"
-PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_COMPAT=( python3_{9..12} )
 PYTHON_REQ_USE="threads(+)"
 
-inherit bash-completion-r1 check-reqs flag-o-matic linux-info ninja-utils pax-utils python-any-r1 toolchain-funcs xdg-utils
+inherit bash-completion-r1 check-reqs flag-o-matic linux-info pax-utils python-any-r1 toolchain-funcs xdg-utils
 
 DESCRIPTION="A JavaScript runtime built on Chrome's V8 JavaScript engine"
 HOMEPAGE="https://nodejs.org/"
@@ -20,7 +20,7 @@ if [[ ${PV} == *9999 ]]; then
 else
 	SRC_URI="https://nodejs.org/dist/v${PV}/node-v${PV}.tar.xz"
 	SLOT="0/$(ver_cut 1)"
-	KEYWORDS="amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv x86 ~amd64-linux ~x64-macos"
+	KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~x86 ~amd64-linux ~x64-macos"
 	S="${WORKDIR}/node-v${PV}"
 fi
 
@@ -36,24 +36,20 @@ RESTRICT="!test? ( test )"
 RDEPEND=">=app-arch/brotli-1.0.9:=
 	>=dev-libs/libuv-1.46.0:=
 	>=net-dns/c-ares-1.18.1:=
-	>=net-libs/nghttp2-1.41.0:=
+	>=net-libs/nghttp2-1.61.0:=
+	>=net-libs/ngtcp2-1.3.0:=
+	>=dev-libs/simdjson-3.9.1:=
 	sys-libs/zlib
 	corepack? ( !sys-apps/yarn )
 	system-icu? ( >=dev-libs/icu-71:= )
 	system-ssl? ( >=dev-libs/openssl-1.1.1:0= )"
 BDEPEND="${PYTHON_DEPS}
-	dev-build/ninja
+	app-alternatives/ninja
 	sys-apps/coreutils
 	virtual/pkgconfig
 	test? ( net-misc/curl )
 	pax-kernel? ( sys-apps/elfix )"
 DEPEND="${RDEPEND}"
-
-PATCHES=(
-	"${FILESDIR}"/${PN}-20.3.0-gcc14.patch
-	"${FILESDIR}"/${PN}-12.22.5-shared_c-ares_nameser_h.patch
-	"${FILESDIR}"/${PN}-16.10.0-libcxx-dont-link-libatomic.patch
-)
 
 # These are measured on a loong machine with -ggdb on, and only checked
 # if debugging flags are present in CFLAGS.
@@ -64,6 +60,10 @@ PATCHES=(
 # fatter binaries and set the disk requirement to 22GiB.
 CHECKREQS_MEMORY="8G"
 CHECKREQS_DISK_BUILD="22G"
+
+PATCHES=(
+	"${FILESDIR}"/${PN}-16.10.0-libcxx-dont-link-libatomic.patch
+)
 
 pkg_pretend() {
 	if [[ ${MERGE_TYPE} != "binary" ]]; then
@@ -88,9 +88,6 @@ src_prepare() {
 	# https://code.google.com/p/gyp/issues/detail?id=260
 	sed -i -e "/append('-arch/d" tools/gyp/pylib/gyp/xcode_emulation.py || die
 
-	# less verbose install output (stating the same as portage, basically)
-	sed -i -e "/print/d" tools/install.py || die
-
 	# proper libdir, hat tip @ryanpcmcquen https://github.com/iojs/io.js/issues/504
 	local LIBDIR=$(get_libdir)
 	sed -i -e "s|lib/|${LIBDIR}/|g" tools/install.py || die
@@ -110,13 +107,12 @@ src_prepare() {
 	# We need to disable mprotect on two files when it builds Bug 694100.
 	use pax-kernel && PATCHES+=( "${FILESDIR}"/${PN}-20.6.0-paxmarking.patch )
 
-	# bug 922725
-	use riscv && PATCHES+=( "${FILESDIR}"/${P}-riscv.patch )
-
 	default
 }
 
 src_configure() {
+	append-cxxflags -D_LARGEFILE64_SOURCE  #clang-musl-overlay custom env
+	append-cflags -D_LARGEFILE64_SOURCE  #clang-musl-overlay custom env
 	xdg_environment_reset
 
 	# LTO compiler flags are handled by configure.py itself
@@ -126,10 +122,18 @@ src_configure() {
 
 	local myconf=(
 		--ninja
+		# ada is not packaged yet
+		# https://github.com/ada-url/ada
+		# --shared-ada
 		--shared-brotli
 		--shared-cares
 		--shared-libuv
 		--shared-nghttp2
+		--shared-ngtcp2
+		--shared-simdjson
+		# sindutf is not packaged yet
+		# https://github.com/simdutf/simdutf
+		# --shared-simdutf
 		--shared-zlib
 	)
 	use debug && myconf+=( --debug )
@@ -174,6 +178,7 @@ src_configure() {
 }
 
 src_compile() {
+#	emake -Onone
 	emake
 }
 
@@ -238,11 +243,15 @@ src_install() {
 src_test() {
 	local drop_tests=(
 	test/parallel/test-dns-resolveany-bad-ancount.js
-		test/parallel/test-fs-read-stream.js
 		test/parallel/test-dns-setserver-when-querying.js
 		test/parallel/test-fs-mkdir.js
+		test/parallel/test-fs-read-stream.js
 		test/parallel/test-fs-utimes-y2K38.js
 		test/parallel/test-fs-watch-recursive-add-file.js
+		test/parallel/test-process-euid-egid.js
+		test/parallel/test-process-initgroups.js
+		test/parallel/test-process-setgroups.js
+		test/parallel/test-process-uid-gid.js
 		test/parallel/test-release-npm.js
 		test/parallel/test-socket-write-after-fin-error.js
 		test/parallel/test-strace-openat-openssl.js
