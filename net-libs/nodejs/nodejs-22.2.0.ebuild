@@ -62,7 +62,7 @@ CHECKREQS_MEMORY="8G"
 CHECKREQS_DISK_BUILD="22G"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-22.2-libcxx-dont-link-libatomic.patch
+	"${FILESDIR}"/${PN}-22.2.0-libcxx-dont-link-libatomic.patch
 )
 
 pkg_pretend() {
