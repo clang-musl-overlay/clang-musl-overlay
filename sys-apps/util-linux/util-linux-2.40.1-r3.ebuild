@@ -87,7 +87,7 @@ RDEPEND+="
 	)
 	uuidd? (
 		acct-user/uuidd
-		virtual/tmpfiles
+		systemd? ( virtual/tmpfiles )
 	)
 	!net-wireless/rfkill
 "
@@ -151,6 +151,9 @@ src_prepare() {
 			# Fails with network-sandbox at least in nspawn
 			lsfd/option-inet
 			utmp/last-ipv6
+
+			# Flaky
+			rename/subdir
 
 			# Permission issues on /dev/random
 			lsfd/mkfds-eventpoll
@@ -427,7 +430,7 @@ pkg_postinst() {
 		elog "might want to add --noclear to your /etc/inittab lines."
 	fi
 
-	if use uuidd; then
+	if use systemd && use uuidd; then
 		tmpfiles_process uuidd-tmpfiles.conf
 	fi
 }
