@@ -1,4 +1,4 @@
-# Copyright 1999-2023 Gentoo Authors
+# Copyright 1999-2024 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -13,7 +13,7 @@ if [[ ${CTARGET} = ${CHOST} ]] ; then
 	fi
 fi
 
-PYTHON_COMPAT=( python3_{9..12} )
+PYTHON_COMPAT=( python3_{9..13} )
 inherit python-any-r1
 inherit autotools bash-completion-r1 flag-o-matic ghc-package
 inherit multiprocessing pax-utils toolchain-funcs prefix
@@ -29,7 +29,7 @@ BIN_PV=${PV}
 #arch_binaries="$arch_binaries alpha? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-alpha.tbz2 )"
 #arch_binaries="$arch_binaries arm? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-armv7a-hardfloat-linux-gnueabi.tbz2 )"
 #arch_binaries="$arch_binaries arm64? ( https://github.com/matoro/ghc/releases/download/${PV}/ghc-bin-${PV}-aarch64-unknown-linux-gnu.tar.gz )"
-arch_binaries="$arch_binaries amd64? ( https://github.com/uidops/ghc-musl/releases/download/${PV}-clang/ghc-bin-${PV}-x86_64-gentoo-linux-musl.tar.xz )"
+arch_binaries="$arch_binaries amd64? ( https://github.com/uidops/ghc-musl/releases/download/${PV}-clang-18/ghc-bin-${PV}-x86_64-gentoo-linux-musl.tar.xz )"
 #arch_binaries="$arch_binaries ia64?  ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-ia64-fixed-fiw.tbz2 )"
 #arch_binaries="$arch_binaries ppc? ( https://slyfox.uni.cx/~slyfox/distfiles/ghc-bin-${PV}-ppc.tbz2 )"
 #arch_binaries="$arch_binaries ppc64? (
@@ -81,7 +81,7 @@ IUSE="big-endian +doc elfutils ghcbootstrap ghcmakebinary +gmp +llvm numa profil
 IUSE+=" binary"
 RESTRICT="!test? ( test )"
 
-LLVM_MAX_SLOT="17"
+LLVM_MAX_SLOT="18"
 RDEPEND="
 	>=dev-lang/perl-5.6.1
 	dev-libs/gmp:0=
@@ -524,7 +524,7 @@ src_prepare() {
 		#use test && eapply "${FILESDIR}/${PN}-9.0.2-fix-tests-python310.patch"
 		eapply "${FILESDIR}"/${PN}-8.10.1-allow-cross-bootstrap.patch
 		#eapply "${FILESDIR}"/${PN}-9.0.2-disable-unboxed-arrays.patch
-		eapply "${FILESDIR}"/${PN}-9.2.6-llvm-16.patch
+		eapply "${FILESDIR}"/${PN}-9.2.8-llvm-18.patch
 		# Fixes 'relocation R_X86_64_32S cannot be used against local symbol; recompile with -fPIC'
 		# eapply "${FILESDIR}"/${PN}-9.2.6-fix-alignment-of-capability.patch
 		eapply "${FILESDIR}"/${PN}-9.2.6-enable-PIC.patch
