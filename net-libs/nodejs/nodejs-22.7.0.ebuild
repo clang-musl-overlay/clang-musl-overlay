@@ -4,10 +4,10 @@
 EAPI=8
 
 CONFIG_CHECK="~ADVISE_SYSCALLS"
-PYTHON_COMPAT=( python3_{9..12} )
+PYTHON_COMPAT=( python3_{10..12} )
 PYTHON_REQ_USE="threads(+)"
 
-inherit bash-completion-r1 check-reqs flag-o-matic linux-info pax-utils python-any-r1 toolchain-funcs xdg-utils
+inherit bash-completion-r1 check-reqs flag-o-matic linux-info pax-utils python-any-r1 xdg-utils
 
 DESCRIPTION="A JavaScript runtime built on Chrome's V8 JavaScript engine"
 HOMEPAGE="https://nodejs.org/"
@@ -35,13 +35,13 @@ RESTRICT="!test? ( test )"
 
 RDEPEND=">=app-arch/brotli-1.0.9:=
 	>=dev-libs/libuv-1.46.0:=
+	>=dev-libs/simdjson-3.9.1:=
 	>=net-dns/c-ares-1.18.1:=
 	>=net-libs/nghttp2-1.61.0:=
 	>=net-libs/ngtcp2-1.3.0:=
-	>=dev-libs/simdjson-3.9.1:=
 	sys-libs/zlib
 	corepack? ( !sys-apps/yarn )
-	system-icu? ( >=dev-libs/icu-71:= )
+	system-icu? ( >=dev-libs/icu-73:= )
 	system-ssl? ( >=dev-libs/openssl-1.1.1:0= )"
 BDEPEND="${PYTHON_DEPS}
 	app-alternatives/ninja
@@ -107,6 +107,9 @@ src_prepare() {
 	# We need to disable mprotect on two files when it builds Bug 694100.
 	use pax-kernel && PATCHES+=( "${FILESDIR}"/${PN}-20.6.0-paxmarking.patch )
 
+	# bug 931256
+	use riscv && PATCHES+=( "${FILESDIR}"/${P}-riscv.patch )
+
 	default
 }
 
@@ -134,6 +137,7 @@ src_configure() {
 		# sindutf is not packaged yet
 		# https://github.com/simdutf/simdutf
 		# --shared-simdutf
+		--shared-sqlite
 		--shared-zlib
 	)
 	use debug && myconf+=( --debug )
@@ -242,13 +246,15 @@ src_install() {
 
 src_test() {
 	local drop_tests=(
-	test/parallel/test-dns-resolveany-bad-ancount.js
+		test/parallel/test-dns.js
+		test/parallel/test-dns-resolveany-bad-ancount.js
 		test/parallel/test-dns-setserver-when-querying.js
 		test/parallel/test-fs-mkdir.js
 		test/parallel/test-fs-read-stream.js
 		test/parallel/test-fs-utimes-y2K38.js
 		test/parallel/test-fs-watch-recursive-add-file.js
 		test/parallel/test-process-euid-egid.js
+		test/parallel/test-process/get-builtin.mjs
 		test/parallel/test-process-initgroups.js
 		test/parallel/test-process-setgroups.js
 		test/parallel/test-process-uid-gid.js
@@ -257,6 +263,13 @@ src_test() {
 		test/parallel/test-strace-openat-openssl.js
 		test/sequential/test-util-debug.js
 	)
+	[[ "$(nice)" -gt 10 ]] && drop_tests+=( "test/parallel/test-os.js" )
+	use inspector || 
+		drop_tests+=(
+			test/parallel/test-inspector-emit-protocol-event.js
+			test/parallel/test-inspector-network-domain.js
+			test/sequential/test-watch-mode.mjs
+		)
 	rm -f "${drop_tests[@]}" || die "disabling tests failed"
 
 	out/${BUILDTYPE}/cctest || die
