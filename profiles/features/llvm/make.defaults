@@ -27,7 +27,7 @@ LLVM_USE_LIBCXX=1
 BOOTSTRAP_USE="${BOOTSTRAP_USE} ssl curl_ssl_openssl"
 
 # clang needs this
-BOOTSTRAP_USE="${BOOTSTRAP_USE} python_single_target_python3_11"
+BOOTSTRAP_USE="${BOOTSTRAP_USE} python_single_target_python3_12"
 
 # llvm related useflags
 BOOTSTRAP_USE="${BOOTSTRAP_USE} clang compiler-rt default-compiler-rt"
