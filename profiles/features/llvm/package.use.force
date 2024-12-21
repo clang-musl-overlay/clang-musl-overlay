@@ -1,22 +1,22 @@
 # disable LLVM_TARGETS
-sys-devel/clang -llvm_targets_AArch64 -llvm_targets_AMDGPU
-sys-devel/clang -llvm_targets_ARM -llvm_targets_AVR
-sys-devel/clang -llvm_targets_BPF -llvm_targets_Hexagon
-sys-devel/clang -llvm_targets_Lanai -llvm_targets_MSP430
-sys-devel/clang -llvm_targets_Mips -llvm_targets_NVPTX
-sys-devel/clang -llvm_targets_PowerPC -llvm_targets_RISCV
-sys-devel/clang -llvm_targets_Sparc -llvm_targets_SystemZ
-sys-devel/clang -llvm_targets_VE -llvm_targets_WebAssembly
-sys-devel/clang -llvm_targets_XCore -llvm_targets_LoongArch
-sys-devel/llvm -llvm_targets_AArch64 -llvm_targets_AMDGPU
-sys-devel/llvm -llvm_targets_ARM -llvm_targets_AVR
-sys-devel/llvm -llvm_targets_BPF -llvm_targets_Hexagon
-sys-devel/llvm -llvm_targets_Lanai -llvm_targets_MSP430
-sys-devel/llvm -llvm_targets_Mips -llvm_targets_NVPTX
-sys-devel/llvm -llvm_targets_PowerPC -llvm_targets_RISCV
-sys-devel/llvm -llvm_targets_Sparc -llvm_targets_SystemZ
-sys-devel/llvm -llvm_targets_VE -llvm_targets_WebAssembly
-sys-devel/llvm -llvm_targets_XCore -llvm_targets_LoongArch
+llvm-core/clang -llvm_targets_AArch64 -llvm_targets_AMDGPU
+llvm-core/clang -llvm_targets_ARM -llvm_targets_AVR
+llvm-core/clang -llvm_targets_BPF -llvm_targets_Hexagon
+llvm-core/clang -llvm_targets_Lanai -llvm_targets_MSP430
+llvm-core/clang -llvm_targets_Mips -llvm_targets_NVPTX
+llvm-core/clang -llvm_targets_PowerPC -llvm_targets_RISCV
+llvm-core/clang -llvm_targets_Sparc -llvm_targets_SystemZ
+llvm-core/clang -llvm_targets_VE -llvm_targets_WebAssembly
+llvm-core/clang -llvm_targets_XCore -llvm_targets_LoongArch
+llvm-core/llvm -llvm_targets_AArch64 -llvm_targets_AMDGPU
+llvm-core/llvm -llvm_targets_ARM -llvm_targets_AVR
+llvm-core/llvm -llvm_targets_BPF -llvm_targets_Hexagon
+llvm-core/llvm -llvm_targets_Lanai -llvm_targets_MSP430
+llvm-core/llvm -llvm_targets_Mips -llvm_targets_NVPTX
+llvm-core/llvm -llvm_targets_PowerPC -llvm_targets_RISCV
+llvm-core/llvm -llvm_targets_Sparc -llvm_targets_SystemZ
+llvm-core/llvm -llvm_targets_VE -llvm_targets_WebAssembly
+llvm-core/llvm -llvm_targets_XCore -llvm_targets_LoongArch
 
 # llvm-conf utility to manage llvm/clang profiles
 sys-devel/llvm-conf binutils-wrappers clang-wrappers native-symlinks
@@ -35,4 +35,4 @@ app-emulation/wine-vanilla mingw
 # default-libcxx in particular changes ABI so can't be toggled at-will, and other
 # profile settings expect it.
 # TODO: Make a profile without default-libcxx too?
-sys-devel/clang-common default-compiler-rt default-lld default-libcxx
+llvm-core/clang-common default-compiler-rt default-lld default-libcxx
