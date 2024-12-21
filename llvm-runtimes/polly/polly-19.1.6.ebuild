@@ -15,7 +15,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE="test"
 RESTRICT="!test? ( test )"
 
-PDEPEND="sys-devel/llvm:${SLOT}="
+PDEPEND="llvm-core/llvm:${SLOT}="
 BDEPEND="
 	${PYTHON_DEPS}
 	>=dev-build/cmake-3.16
