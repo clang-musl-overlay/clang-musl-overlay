@@ -1,0 +1,9 @@
+--- a/libapparmor_re/aare_rules.cc
++++ b/libapparmor_re/aare_rules.cc
+@@ -23,7 +23,6 @@
+ #include <iostream>
+ #include <fstream>
+ #include <sstream>
+-#include <ext/stdio_filebuf.h>
+ #include <assert.h>
+ #include <stdlib.h>
