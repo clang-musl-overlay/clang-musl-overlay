@@ -1,0 +1,12 @@
+--- a/make/hotspot/lib/JvmMapfile.gmk	2024-01-16 16:19:00.000000000 +0000
++++ b/make/hotspot/lib/JvmMapfile.gmk	2024-03-17 09:34:57.576683835 +0000
+@@ -53,7 +53,7 @@
+ # platform dependent.
+ 
+ ifeq ($(call isTargetOs, linux), true)
+-  DUMP_SYMBOLS_CMD := $(NM) $(NMFLAGS) --defined-only *$(OBJ_SUFFIX)
++  DUMP_SYMBOLS_CMD := $(NM) $(NMFLAGS) --defined-only --extern-only *$(OBJ_SUFFIX)
+   ifneq ($(FILTER_SYMBOLS_PATTERN), )
+     FILTER_SYMBOLS_PATTERN := $(FILTER_SYMBOLS_PATTERN)|
+   endif
+
