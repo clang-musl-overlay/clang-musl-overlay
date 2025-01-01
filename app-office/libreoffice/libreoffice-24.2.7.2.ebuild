@@ -324,7 +324,7 @@ PATCHES=(
 	"${FILESDIR}/${P}-no-std-basic_string-int.patch" # bug #923950
 
 	# Fix ftype (bug #933267), upstream patch, implemented by clang-musl-overlay
-	"${FILESDIR}/${P}-24.2.6.2-fix-ftype.patch"
+	"${FILESDIR}/${PN}-24.2.6.2-fix-ftype.patch"
 
 	# git master
 	# bug #917618, thx to Debian:
